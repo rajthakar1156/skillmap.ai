@@ -3,9 +3,13 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Compass, Target, TrendingUp, Users, CheckCircle, Sparkles, ArrowRight, Star, Award, BookOpen, BrainCircuit } from "lucide-react";
+import { Compass, Target, TrendingUp, Users, CheckCircle, Sparkles, ArrowRight, Star, Award, BookOpen, BrainCircuit, Zap, Globe } from "lucide-react";
 import Header from "@/components/Header";
-import heroImage from "@/assets/hero-students.jpg";
+import { BackgroundBeams } from "@/components/ui/background-beams";
+import { BackgroundGradient } from "@/components/ui/background-gradient";
+import { TextGenerateEffect } from "@/components/ui/text-generate-effect";
+import { GridBackground } from "@/components/ui/grid-background";
+import { motion } from "framer-motion";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -66,93 +70,185 @@ const Index = () => {
       <Header />
       
       {/* Hero Section */}
-      <section className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-hero opacity-95"></div>
-        <div 
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-20"
-          style={{ backgroundImage: `url(${heroImage})` }}
-        ></div>
+      <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-black">
+        {/* Animated Background */}
+        <GridBackground />
+        <BackgroundBeams className="opacity-40" />
         
-        <div className="relative container mx-auto px-4 py-16 sm:py-20 lg:py-32">
-          <div className="max-w-4xl mx-auto text-center text-white">
-            <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-3 sm:px-4 py-2 mb-6 border border-white/20">
-              <BrainCircuit className="w-4 h-4" />
-              <span className="text-xs sm:text-sm font-medium">AI-Powered Career Guidance</span>
+        {/* Content */}
+        <div className="relative z-10 container mx-auto px-4 py-16 sm:py-20 lg:py-32">
+          <div className="max-w-6xl mx-auto text-center">
+            {/* Badge */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-3 sm:px-4 py-2 mb-8 border border-white/20"
+            >
+              <BrainCircuit className="w-4 h-4 text-primary" />
+              <span className="text-xs sm:text-sm font-medium text-white">AI-Powered Career Guidance</span>
+            </motion.div>
+            
+            {/* Main Heading */}
+            <div className="mb-8">
+              <motion.h1 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.7, delay: 0.2 }}
+                className="text-4xl sm:text-5xl md:text-6xl lg:text-8xl font-bold leading-tight text-white"
+              >
+                Discover Your
+              </motion.h1>
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.8, delay: 0.4 }}
+                className="mt-4"
+              >
+                <BackgroundGradient className="rounded-3xl p-4 sm:p-6">
+                  <span className="text-4xl sm:text-5xl md:text-6xl lg:text-8xl font-bold bg-gradient-to-r from-blue-400 via-purple-500 to-cyan-400 bg-clip-text text-transparent">
+                    Perfect Career
+                  </span>
+                </BackgroundGradient>
+              </motion.div>
             </div>
             
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-bold mb-6 leading-tight">
-              Discover Your
-              <span className="block bg-gradient-to-r from-yellow-300 to-orange-300 bg-clip-text text-transparent">
-                Perfect Career
-              </span>
-            </h1>
+            {/* Subtitle with Text Generate Effect */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 1, delay: 0.8 }}
+              className="mb-10"
+            >
+              <TextGenerateEffect
+                words="India's most trusted AI career counselor. Get personalized recommendations based on your academics, interests, and personality - tailored for the Indian job market."
+                className="text-base sm:text-lg lg:text-xl text-white/90 max-w-4xl mx-auto leading-relaxed"
+              />
+            </motion.div>
             
-            <p className="text-base sm:text-lg lg:text-2xl mb-8 text-white/90 max-w-3xl mx-auto leading-relaxed px-4">
-              India's most trusted AI career counselor. Get personalized recommendations 
-              based on your academics, interests, and personality - tailored for the Indian job market.
-            </p>
-            
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center px-4">
-              <Button 
-                variant="hero" 
-                size="xl"
-                onClick={() => navigate('/profile')}
-                className="bg-white text-primary hover:bg-white/90 hover:scale-105 w-full sm:w-auto sm:min-w-[250px]"
-              >
-                <Compass className="w-5 h-5 mr-2" />
-                Start Your Career Journey
-                <ArrowRight className="w-5 h-5 ml-2" />
-              </Button>
+            {/* CTA Buttons */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 1.2 }}
+              className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12"
+            >
+              <BackgroundGradient containerClassName="rounded-full">
+                <Button 
+                  size="xl"
+                  onClick={() => navigate('/profile')}
+                  className="bg-black text-white hover:bg-gray-900 border-0 rounded-full px-8 py-4 text-lg font-semibold"
+                >
+                  <Compass className="w-5 h-5 mr-2" />
+                  Start Your Career Journey
+                  <ArrowRight className="w-5 h-5 ml-2" />
+                </Button>
+              </BackgroundGradient>
               
               <div className="flex items-center gap-2 text-white/80">
-                <CheckCircle className="w-4 h-4 text-green-300" />
+                <CheckCircle className="w-4 h-4 text-green-400" />
                 <span className="text-xs sm:text-sm">100% Free • No Registration Required</span>
               </div>
-            </div>
+            </motion.div>
             
-            <div className="mt-12 grid grid-cols-3 gap-4 sm:gap-8 max-w-2xl mx-auto px-4">
-              <div className="text-center">
-                <div className="text-2xl sm:text-3xl font-bold text-white">50K+</div>
-                <div className="text-xs sm:text-sm text-white/70">Students Guided</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl sm:text-3xl font-bold text-white">95%</div>
-                <div className="text-xs sm:text-sm text-white/70">Accuracy Rate</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl sm:text-3xl font-bold text-white">500+</div>
-                <div className="text-xs sm:text-sm text-white/70">Career Paths</div>
-              </div>
-            </div>
+            {/* Stats */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 1.4 }}
+              className="grid grid-cols-3 gap-4 sm:gap-8 max-w-2xl mx-auto"
+            >
+              {[
+                { number: "50K+", label: "Students Guided", icon: Users },
+                { number: "95%", label: "Accuracy Rate", icon: Target },
+                { number: "500+", label: "Career Paths", icon: Globe }
+              ].map((stat, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.5, delay: 1.6 + index * 0.1 }}
+                  className="text-center group"
+                >
+                  <div className="flex justify-center mb-2">
+                    <stat.icon className="w-6 h-6 text-primary group-hover:scale-110 transition-transform duration-300" />
+                  </div>
+                  <div className="text-2xl sm:text-3xl font-bold text-white group-hover:text-primary transition-colors duration-300">{stat.number}</div>
+                  <div className="text-xs sm:text-sm text-white/70">{stat.label}</div>
+                </motion.div>
+              ))}
+            </motion.div>
           </div>
         </div>
+        
+        {/* Scroll Indicator */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 1, delay: 2 }}
+          className="absolute bottom-8 left-1/2 transform -translate-x-1/2"
+        >
+          <motion.div
+            animate={{ y: [0, 10, 0] }}
+            transition={{ duration: 2, repeat: Infinity }}
+            className="w-6 h-10 border-2 border-white/30 rounded-full flex justify-center"
+          >
+            <motion.div
+              animate={{ y: [0, 12, 0] }}
+              transition={{ duration: 2, repeat: Infinity }}
+              className="w-1 h-3 bg-white/60 rounded-full mt-2"
+            />
+          </motion.div>
+        </motion.div>
       </section>
 
       {/* Features Section */}
-      <section className="py-16 sm:py-20 bg-muted/30">
+      <section className="py-16 sm:py-20 bg-background">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-12 sm:mb-16">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            viewport={{ once: true }}
+            className="text-center mb-12 sm:mb-16"
+          >
             <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-4">
               Why Choose <span className="bg-gradient-hero bg-clip-text text-transparent">CareerJyoti</span>?
             </h2>
             <p className="text-base sm:text-lg lg:text-xl text-muted-foreground max-w-2xl mx-auto">
               Advanced AI technology meets deep understanding of the Indian education and job market
             </p>
-          </div>
+          </motion.div>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
             {features.map((feature, index) => (
-              <Card key={index} className="shadow-card hover:shadow-elegant transition-all duration-300 border-0 bg-gradient-card animate-fade-in group">
-                <CardHeader className="pb-4">
-                  <feature.icon className={`w-10 sm:w-12 h-10 sm:h-12 ${feature.color} mb-4 group-hover:scale-110 transition-transform duration-300`} />
-                  <CardTitle className="text-lg sm:text-xl">{feature.title}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <CardDescription className="text-sm sm:text-base leading-relaxed">
-                    {feature.description}
-                  </CardDescription>
-                </CardContent>
-              </Card>
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: index * 0.2 }}
+                viewport={{ once: true }}
+                whileHover={{ y: -5 }}
+              >
+                <BackgroundGradient className="rounded-3xl p-1">
+                  <Card className="shadow-card border-0 bg-background h-full">
+                    <CardHeader className="pb-4">
+                      <motion.div
+                        whileHover={{ scale: 1.1, rotate: 5 }}
+                        transition={{ duration: 0.3 }}
+                      >
+                        <feature.icon className={`w-10 sm:w-12 h-10 sm:h-12 ${feature.color} mb-4`} />
+                      </motion.div>
+                      <CardTitle className="text-lg sm:text-xl">{feature.title}</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <CardDescription className="text-sm sm:text-base leading-relaxed">
+                        {feature.description}
+                      </CardDescription>
+                    </CardContent>
+                  </Card>
+                </BackgroundGradient>
+              </motion.div>
             ))}
           </div>
         </div>
