@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Compass, Target, TrendingUp, Users, CheckCircle, Sparkles, ArrowRight, Star, Award, BookOpen, BrainCircuit, Zap, Globe } from "lucide-react";
+import { Compass, Target, TrendingUp, Users, CheckCircle, Sparkles, ArrowRight, Star, Award, BookOpen, BrainCircuit, Zap, Globe, Play } from "lucide-react";
 import Header from "@/components/Header";
 import { BackgroundBeams } from "@/components/ui/background-beams";
 import { BackgroundGradient } from "@/components/ui/background-gradient";
@@ -70,184 +70,136 @@ const Index = () => {
       <Header />
       
       {/* Hero Section */}
-      <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-black">
-        {/* Animated Background */}
+      <section className="min-h-screen relative flex items-center justify-center overflow-hidden bg-background">
         <GridBackground />
-        <BackgroundBeams className="opacity-40" />
+        <BackgroundBeams />
         
-        {/* Content */}
-        <div className="relative z-10 container mx-auto px-4 py-16 sm:py-20 lg:py-32">
-          <div className="max-w-6xl mx-auto text-center">
-            {/* Badge */}
+        <div className="relative container mx-auto px-4 text-center z-10">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            className="max-w-4xl mx-auto"
+          >
+            <motion.h1 
+              className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold mb-6 leading-tight"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+            >
+              <span className="text-foreground">Discover Your</span>{" "}
+              <span className="bg-gradient-primary bg-clip-text text-transparent">Perfect Career</span>{" "}
+              <span className="text-foreground">with AI</span>
+            </motion.h1>
+            
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-              className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-3 sm:px-4 py-2 mb-8 border border-white/20"
+              transition={{ duration: 0.8, delay: 0.4 }}
             >
-              <BrainCircuit className="w-4 h-4 text-primary" />
-              <span className="text-xs sm:text-sm font-medium text-white">AI-Powered Career Guidance</span>
-            </motion.div>
-            
-            {/* Main Heading */}
-            <div className="mb-8">
-              <motion.h1 
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.7, delay: 0.2 }}
-                className="text-4xl sm:text-5xl md:text-6xl lg:text-8xl font-bold leading-tight text-white"
-              >
-                Discover Your
-              </motion.h1>
-              <motion.div
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.8, delay: 0.4 }}
-                className="mt-4"
-              >
-                <BackgroundGradient className="rounded-3xl p-4 sm:p-6">
-                  <span className="text-4xl sm:text-5xl md:text-6xl lg:text-8xl font-bold bg-gradient-to-r from-blue-400 via-purple-500 to-cyan-400 bg-clip-text text-transparent">
-                    Perfect Career
-                  </span>
-                </BackgroundGradient>
-              </motion.div>
-            </div>
-            
-            {/* Subtitle with Text Generate Effect */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 1, delay: 0.8 }}
-              className="mb-10"
-            >
-              <TextGenerateEffect
-                words="India's most trusted AI career counselor. Get personalized recommendations based on your academics, interests, and personality - tailored for the Indian job market."
-                className="text-base sm:text-lg lg:text-xl text-white/90 max-w-4xl mx-auto leading-relaxed"
+              <TextGenerateEffect 
+                words="Get personalized career recommendations powered by advanced AI. Designed specifically for Indian students to navigate the modern job market with confidence."
+                className="text-lg sm:text-xl lg:text-2xl text-muted-foreground mb-8 max-w-3xl mx-auto leading-relaxed"
               />
             </motion.div>
             
-            {/* CTA Buttons */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 1.2 }}
+              transition={{ duration: 0.8, delay: 0.6 }}
               className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12"
             >
-              <BackgroundGradient containerClassName="rounded-full">
-                <Button 
-                  size="xl"
-                  onClick={() => navigate('/profile')}
-                  className="bg-black text-white hover:bg-gray-900 border-0 rounded-full px-8 py-4 text-lg font-semibold"
-                >
-                  <Compass className="w-5 h-5 mr-2" />
-                  Start Your Career Journey
-                  <ArrowRight className="w-5 h-5 ml-2" />
-                </Button>
-              </BackgroundGradient>
+              <Button 
+                variant="default"
+                size="xl" 
+                onClick={() => navigate('/profile')}
+                className="bg-primary hover:bg-primary/90 text-primary-foreground min-w-[200px] h-12 text-lg font-medium rounded-lg transition-all duration-300 hover:scale-105 hover:shadow-lg"
+              >
+                <Compass className="w-5 h-5 mr-2" />
+                Start Free Analysis
+              </Button>
               
-              <div className="flex items-center gap-2 text-white/80">
-                <CheckCircle className="w-4 h-4 text-green-400" />
-                <span className="text-xs sm:text-sm">100% Free • No Registration Required</span>
-              </div>
+              <Button 
+                variant="outline" 
+                size="xl"
+                className="min-w-[200px] h-12 text-lg font-medium rounded-lg border-2 hover:bg-secondary transition-all duration-300"
+              >
+                <Play className="w-5 h-5 mr-2" />
+                Watch Demo
+              </Button>
             </motion.div>
             
-            {/* Stats */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 1.4 }}
-              className="grid grid-cols-3 gap-4 sm:gap-8 max-w-2xl mx-auto"
+              transition={{ duration: 0.8, delay: 0.8 }}
+              className="flex flex-wrap justify-center items-center gap-6 text-sm text-muted-foreground"
             >
-              {[
-                { number: "50K+", label: "Students Guided", icon: Users },
-                { number: "95%", label: "Accuracy Rate", icon: Target },
-                { number: "500+", label: "Career Paths", icon: Globe }
-              ].map((stat, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.5, delay: 1.6 + index * 0.1 }}
-                  className="text-center group"
-                >
-                  <div className="flex justify-center mb-2">
-                    <stat.icon className="w-6 h-6 text-primary group-hover:scale-110 transition-transform duration-300" />
-                  </div>
-                  <div className="text-2xl sm:text-3xl font-bold text-white group-hover:text-primary transition-colors duration-300">{stat.number}</div>
-                  <div className="text-xs sm:text-sm text-white/70">{stat.label}</div>
-                </motion.div>
-              ))}
+              <div className="flex items-center gap-2">
+                <CheckCircle className="w-4 h-4 text-accent" />
+                <span>50,000+ Students Guided</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <CheckCircle className="w-4 h-4 text-accent" />
+                <span>500+ Career Paths</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <CheckCircle className="w-4 h-4 text-accent" />
+                <span>98% Accuracy Rate</span>
+              </div>
             </motion.div>
-          </div>
-        </div>
-        
-        {/* Scroll Indicator */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 1, delay: 2 }}
-          className="absolute bottom-8 left-1/2 transform -translate-x-1/2"
-        >
-          <motion.div
-            animate={{ y: [0, 10, 0] }}
-            transition={{ duration: 2, repeat: Infinity }}
-            className="w-6 h-10 border-2 border-white/30 rounded-full flex justify-center"
-          >
-            <motion.div
-              animate={{ y: [0, 12, 0] }}
-              transition={{ duration: 2, repeat: Infinity }}
-              className="w-1 h-3 bg-white/60 rounded-full mt-2"
-            />
           </motion.div>
-        </motion.div>
+        </div>
       </section>
 
       {/* Features Section */}
-      <section className="py-16 sm:py-20 bg-background">
+      <section className="py-20 sm:py-24 bg-secondary/30">
         <div className="container mx-auto px-4">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
             viewport={{ once: true }}
-            className="text-center mb-12 sm:mb-16"
+            className="text-center mb-16 sm:mb-20"
           >
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-4">
-              Why Choose <span className="bg-gradient-hero bg-clip-text text-transparent">SkillMap.ai</span>?
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-6">
+              Why Choose <span className="text-primary">SkillMap.ai</span>?
             </h2>
-            <p className="text-base sm:text-lg lg:text-xl text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-lg sm:text-xl lg:text-2xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
               Advanced AI technology meets deep understanding of the Indian education and job market
             </p>
           </motion.div>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 sm:gap-10">
             {features.map((feature, index) => (
               <motion.div
                 key={index}
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: index * 0.2 }}
+                transition={{ duration: 0.6, delay: index * 0.1 }}
                 viewport={{ once: true }}
-                whileHover={{ y: -5 }}
+                whileHover={{ y: -8 }}
+                className="group"
               >
-                <BackgroundGradient className="rounded-3xl p-1">
-                  <Card className="shadow-card border-0 bg-background h-full">
-                    <CardHeader className="pb-4">
-                      <motion.div
-                        whileHover={{ scale: 1.1, rotate: 5 }}
-                        transition={{ duration: 0.3 }}
-                      >
-                        <feature.icon className={`w-10 sm:w-12 h-10 sm:h-12 ${feature.color} mb-4`} />
-                      </motion.div>
-                      <CardTitle className="text-lg sm:text-xl">{feature.title}</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <CardDescription className="text-sm sm:text-base leading-relaxed">
-                        {feature.description}
-                      </CardDescription>
-                    </CardContent>
-                  </Card>
-                </BackgroundGradient>
+                <Card className="h-full border-0 shadow-card hover:shadow-elegant transition-all duration-300 bg-card/80 backdrop-blur-sm group-hover:bg-card">
+                  <CardHeader className="pb-4 text-center">
+                    <motion.div
+                      whileHover={{ scale: 1.1, rotate: 5 }}
+                      transition={{ duration: 0.3 }}
+                      className="mx-auto mb-6"
+                    >
+                      <div className="w-16 h-16 rounded-2xl bg-gradient-primary flex items-center justify-center">
+                        <feature.icon className="w-8 h-8 text-primary-foreground" />
+                      </div>
+                    </motion.div>
+                    <CardTitle className="text-xl sm:text-2xl font-semibold">{feature.title}</CardTitle>
+                  </CardHeader>
+                  <CardContent className="text-center">
+                    <CardDescription className="text-base leading-relaxed text-muted-foreground">
+                      {feature.description}
+                    </CardDescription>
+                  </CardContent>
+                </Card>
               </motion.div>
             ))}
           </div>
@@ -255,63 +207,72 @@ const Index = () => {
       </section>
 
       {/* Benefits Section */}
-      <section className="py-16 sm:py-20">
+      <section className="py-20 sm:py-24 bg-background">
         <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
             <div>
-              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-6">
+              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-8 leading-tight">
                 Everything You Need for 
-                <span className="bg-gradient-secondary bg-clip-text text-transparent block">
-                  Career Success
-                </span>
+                <span className="text-primary block">Career Success</span>
               </h2>
-              <p className="text-base sm:text-lg text-muted-foreground mb-8 leading-relaxed">
+              <p className="text-lg sm:text-xl text-muted-foreground mb-10 leading-relaxed">
                 Our comprehensive analysis covers every aspect of your profile to provide 
                 the most accurate and actionable career guidance.
               </p>
               
-              <div className="space-y-3 sm:space-y-4">
+              <div className="space-y-4 mb-10">
                 {benefits.map((benefit, index) => (
-                  <div key={index} className="flex items-start gap-3 animate-fade-in" style={{ animationDelay: `${index * 100}ms` }}>
-                    <CheckCircle className="w-4 sm:w-5 h-4 sm:h-5 text-secondary mt-0.5 flex-shrink-0" />
-                    <span className="text-sm sm:text-base text-foreground">{benefit}</span>
-                  </div>
+                  <motion.div 
+                    key={index} 
+                    className="flex items-start gap-4"
+                    initial={{ opacity: 0, x: -20 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.5, delay: index * 0.1 }}
+                    viewport={{ once: true }}
+                  >
+                    <div className="w-6 h-6 rounded-full bg-accent/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <CheckCircle className="w-4 h-4 text-accent" />
+                    </div>
+                    <span className="text-base sm:text-lg text-foreground leading-relaxed">{benefit}</span>
+                  </motion.div>
                 ))}
               </div>
               
               <Button 
-                variant="secondary" 
+                variant="default" 
                 size="lg" 
-                className="mt-8"
+                className="bg-primary hover:bg-primary/90 text-primary-foreground h-12 px-8 text-lg font-medium rounded-lg"
                 onClick={() => navigate('/profile')}
               >
                 Get Started Now
-                <ArrowRight className="w-4 h-4 ml-2" />
+                <ArrowRight className="w-5 h-5 ml-2" />
               </Button>
             </div>
             
             <div className="relative lg:order-1">
-              <div className="bg-gradient-to-br from-primary/5 to-secondary/5 dark:from-primary/10 dark:to-secondary/10 border border-border/50 rounded-2xl p-6 sm:p-8 shadow-elegant hover:shadow-glow transition-all duration-300 backdrop-blur-sm">
-                <div className="flex items-center gap-2 mb-6">
-                  <Award className="w-6 h-6 text-primary" />
-                  <h3 className="text-lg sm:text-2xl font-semibold text-foreground">Sample Career Match</h3>
+              <div className="bg-card border border-border rounded-3xl p-8 sm:p-10 shadow-card hover:shadow-elegant transition-all duration-300">
+                <div className="flex items-center gap-3 mb-8">
+                  <div className="w-12 h-12 rounded-2xl bg-gradient-primary flex items-center justify-center">
+                    <Award className="w-6 h-6 text-primary-foreground" />
+                  </div>
+                  <h3 className="text-xl sm:text-2xl font-semibold text-foreground">Sample Career Match</h3>
                 </div>
-                <div className="space-y-4">
+                <div className="space-y-6">
                   <div className="flex justify-between items-center">
-                    <span className="text-sm sm:text-base text-muted-foreground">Match Score</span>
-                    <Badge className="bg-secondary/20 text-secondary border-secondary/30 font-semibold">96%</Badge>
+                    <span className="text-base text-muted-foreground">Match Score</span>
+                    <Badge className="bg-accent/20 text-accent border-accent/30 font-semibold text-base px-3 py-1">96%</Badge>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-sm sm:text-base text-muted-foreground">Career</span>
-                    <span className="text-sm sm:text-base font-medium text-foreground">Software Engineer</span>
+                    <span className="text-base text-muted-foreground">Career</span>
+                    <span className="text-base font-semibold text-foreground">Software Engineer</span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-sm sm:text-base text-muted-foreground">Salary Range</span>
-                    <span className="text-sm sm:text-base font-medium text-secondary">₹8L - ₹15L</span>
+                    <span className="text-base text-muted-foreground">Salary Range</span>
+                    <span className="text-base font-semibold text-accent">₹8L - ₹15L</span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-sm sm:text-base text-muted-foreground">Growth</span>
-                    <span className="text-sm sm:text-base font-medium text-accent">Excellent</span>
+                    <span className="text-base text-muted-foreground">Growth</span>
+                    <span className="text-base font-semibold text-primary">Excellent</span>
                   </div>
                 </div>
               </div>
@@ -321,35 +282,44 @@ const Index = () => {
       </section>
 
       {/* Testimonials Section */}
-      <section className="py-16 sm:py-20 bg-muted/20 dark:bg-muted/10">
+      <section className="py-20 sm:py-24 bg-secondary/20">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-12 sm:mb-16">
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-4">
-              Success Stories from <span className="bg-gradient-hero bg-clip-text text-transparent">Students</span>
+          <div className="text-center mb-16 sm:mb-20">
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-6">
+              Success Stories from <span className="text-primary">Students</span>
             </h2>
-            <p className="text-base sm:text-lg lg:text-xl text-muted-foreground">
+            <p className="text-lg sm:text-xl lg:text-2xl text-muted-foreground max-w-3xl mx-auto">
               See how SkillMap.ai has helped thousands of students find their perfect career path
             </p>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 sm:gap-10">
             {testimonials.map((testimonial, index) => (
-              <Card key={index} className="shadow-card hover:shadow-elegant transition-all duration-300 bg-card border border-border group">
-                <CardHeader className="pb-3">
-                  <div className="flex items-center gap-1 mb-2">
-                    {[...Array(testimonial.rating)].map((_, i) => (
-                      <Star key={i} className="w-3 sm:w-4 h-3 sm:h-4 text-yellow-500 fill-current" />
-                    ))}
-                  </div>
-                  <CardTitle className="text-base sm:text-lg group-hover:text-primary transition-colors">{testimonial.name}</CardTitle>
-                  <Badge variant="outline" className="w-fit text-xs">{testimonial.stream}</Badge>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm sm:text-base text-muted-foreground italic leading-relaxed">
-                    "{testimonial.quote}"
-                  </p>
-                </CardContent>
-              </Card>
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: index * 0.1 }}
+                viewport={{ once: true }}
+                whileHover={{ y: -5 }}
+              >
+                <Card className="h-full shadow-card hover:shadow-elegant transition-all duration-300 bg-card border-0 group">
+                  <CardHeader className="pb-4">
+                    <div className="flex items-center gap-1 mb-4">
+                      {[...Array(testimonial.rating)].map((_, i) => (
+                        <Star key={i} className="w-4 h-4 text-yellow-500 fill-current" />
+                      ))}
+                    </div>
+                    <CardTitle className="text-lg sm:text-xl font-semibold group-hover:text-primary transition-colors">{testimonial.name}</CardTitle>
+                    <Badge variant="outline" className="w-fit text-sm border-border/50">{testimonial.stream}</Badge>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-base text-muted-foreground leading-relaxed">
+                      "{testimonial.quote}"
+                    </p>
+                  </CardContent>
+                </Card>
+              </motion.div>
             ))}
           </div>
         </div>
