@@ -48,7 +48,7 @@ const Index = () => {
     {
       name: "Priya Sharma",
       stream: "Science PCM",
-      quote: "CareerJyoti helped me discover my passion for AI and machine learning. Now I'm working at a top tech company!",
+      quote: "SkillMap.ai helped me discover my passion for AI and machine learning. Now I'm working at a top tech company!",
       rating: 5
     },
     {
@@ -60,7 +60,7 @@ const Index = () => {
     {
       name: "Sneha Reddy",
       stream: "Science PCB",
-      quote: "Found my calling in biomedical engineering through CareerJyoti's personalized analysis.",
+      quote: "Found my calling in biomedical engineering through SkillMap.ai's personalized analysis.",
       rating: 5
     }
   ];
@@ -213,7 +213,7 @@ const Index = () => {
             className="text-center mb-12 sm:mb-16"
           >
             <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-4">
-              Why Choose <span className="bg-gradient-hero bg-clip-text text-transparent">CareerJyoti</span>?
+              Why Choose <span className="bg-gradient-hero bg-clip-text text-transparent">SkillMap.ai</span>?
             </h2>
             <p className="text-base sm:text-lg lg:text-xl text-muted-foreground max-w-2xl mx-auto">
               Advanced AI technology meets deep understanding of the Indian education and job market
@@ -321,24 +321,24 @@ const Index = () => {
       </section>
 
       {/* Testimonials Section */}
-      <section className="py-16 sm:py-20 bg-muted/30">
+      <section className="py-16 sm:py-20 bg-muted/20 dark:bg-muted/10">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12 sm:mb-16">
             <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-4">
               Success Stories from <span className="bg-gradient-hero bg-clip-text text-transparent">Students</span>
             </h2>
             <p className="text-base sm:text-lg lg:text-xl text-muted-foreground">
-              See how CareerJyoti has helped thousands of students find their perfect career path
+              See how SkillMap.ai has helped thousands of students find their perfect career path
             </p>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
             {testimonials.map((testimonial, index) => (
-              <Card key={index} className="shadow-card hover:shadow-elegant transition-all duration-300 bg-gradient-card border-0 group">
+              <Card key={index} className="shadow-card hover:shadow-elegant transition-all duration-300 bg-card border border-border group">
                 <CardHeader className="pb-3">
                   <div className="flex items-center gap-1 mb-2">
                     {[...Array(testimonial.rating)].map((_, i) => (
-                      <Star key={i} className="w-3 sm:w-4 h-3 sm:h-4 text-yellow-400 fill-current" />
+                      <Star key={i} className="w-3 sm:w-4 h-3 sm:h-4 text-accent fill-current" />
                     ))}
                   </div>
                   <CardTitle className="text-base sm:text-lg group-hover:text-primary transition-colors">{testimonial.name}</CardTitle>
@@ -363,7 +363,7 @@ const Index = () => {
             Ready to Discover Your Future?
           </h2>
           <p className="text-base sm:text-lg lg:text-xl text-white/90 mb-8 max-w-2xl mx-auto">
-            Join thousands of students who have found their perfect career path with CareerJyoti's AI-powered guidance.
+            Join thousands of students who have found their perfect career path with SkillMap.ai's AI-powered guidance.
           </p>
           
           <Button 
@@ -394,7 +394,7 @@ const Index = () => {
                   <Compass className="h-5 w-5 text-white" />
                 </div>
                 <span className="text-xl font-bold bg-gradient-primary bg-clip-text text-transparent">
-                  CareerJyoti
+                  SkillMap.ai
                 </span>
               </div>
               <p className="text-muted-foreground text-sm leading-relaxed max-w-md">
@@ -426,7 +426,7 @@ const Index = () => {
           
           <div className="border-t border-border/40 mt-8 pt-8 text-center">
             <p className="text-muted-foreground text-sm">
-              © 2025 CareerJyoti. All rights reserved. Built with ❤️ for Indian students.
+              © 2025 SkillMap.ai. All rights reserved. Built with ❤️ for Indian students.
             </p>
           </div>
         </div>
