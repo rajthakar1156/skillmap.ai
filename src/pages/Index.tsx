@@ -291,19 +291,19 @@ const Index = () => {
             </div>
             
             <div className="relative lg:order-1">
-              <div className="bg-gradient-card rounded-2xl p-6 sm:p-8 shadow-elegant hover:shadow-glow transition-all duration-300">
+              <div className="bg-gradient-to-br from-primary/5 to-secondary/5 dark:from-primary/10 dark:to-secondary/10 border border-border/50 rounded-2xl p-6 sm:p-8 shadow-elegant hover:shadow-glow transition-all duration-300 backdrop-blur-sm">
                 <div className="flex items-center gap-2 mb-6">
                   <Award className="w-6 h-6 text-primary" />
-                  <h3 className="text-lg sm:text-2xl font-semibold">Sample Career Match</h3>
+                  <h3 className="text-lg sm:text-2xl font-semibold text-foreground">Sample Career Match</h3>
                 </div>
                 <div className="space-y-4">
                   <div className="flex justify-between items-center">
                     <span className="text-sm sm:text-base text-muted-foreground">Match Score</span>
-                    <Badge className="bg-secondary text-secondary-foreground font-semibold">96%</Badge>
+                    <Badge className="bg-secondary/20 text-secondary border-secondary/30 font-semibold">96%</Badge>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-sm sm:text-base text-muted-foreground">Career</span>
-                    <span className="text-sm sm:text-base font-medium">Software Engineer</span>
+                    <span className="text-sm sm:text-base font-medium text-foreground">Software Engineer</span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-sm sm:text-base text-muted-foreground">Salary Range</span>
@@ -338,7 +338,7 @@ const Index = () => {
                 <CardHeader className="pb-3">
                   <div className="flex items-center gap-1 mb-2">
                     {[...Array(testimonial.rating)].map((_, i) => (
-                      <Star key={i} className="w-3 sm:w-4 h-3 sm:h-4 text-accent fill-current" />
+                      <Star key={i} className="w-3 sm:w-4 h-3 sm:h-4 text-yellow-500 fill-current" />
                     ))}
                   </div>
                   <CardTitle className="text-base sm:text-lg group-hover:text-primary transition-colors">{testimonial.name}</CardTitle>
@@ -356,30 +356,33 @@ const Index = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-16 sm:py-20 bg-gradient-hero relative overflow-hidden">
-        <div className="absolute inset-0 bg-black/10"></div>
+      <section className="py-16 sm:py-20 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-secondary/5 to-accent/10 dark:from-primary/20 dark:via-secondary/10 dark:to-accent/20"></div>
+        <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
         <div className="relative container mx-auto px-4 text-center">
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold text-white mb-6">
-            Ready to Discover Your Future?
-          </h2>
-          <p className="text-base sm:text-lg lg:text-xl text-white/90 mb-8 max-w-2xl mx-auto">
-            Join thousands of students who have found their perfect career path with SkillMap.ai's AI-powered guidance.
-          </p>
-          
-          <Button 
-            variant="hero" 
-            size="xl"
-            onClick={() => navigate('/profile')}
-            className="bg-white text-primary hover:bg-white/90 hover:scale-105 w-full sm:w-auto sm:min-w-[280px]"
-          >
-            <Compass className="w-5 h-5 mr-2" />
-            Start Your Analysis Now
-            <ArrowRight className="w-5 h-5 ml-2" />
-          </Button>
-          
-          <p className="text-white/70 text-xs sm:text-sm mt-4">
-            Takes only 5 minutes • Get instant results • Completely free
-          </p>
+          <div className="bg-gradient-to-br from-background/80 to-background/60 dark:from-background/90 dark:to-background/70 backdrop-blur-lg border border-border/50 rounded-3xl p-8 sm:p-12 lg:p-16 shadow-elegant max-w-4xl mx-auto">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold text-foreground mb-6">
+              Ready to Discover Your Future?
+            </h2>
+            <p className="text-base sm:text-lg lg:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
+              Join thousands of students who have found their perfect career path with SkillMap.ai's AI-powered guidance.
+            </p>
+            
+            <Button 
+              variant="default" 
+              size="xl"
+              onClick={() => navigate('/profile')}
+              className="bg-gradient-primary hover:shadow-glow transition-all duration-300 hover:scale-105 w-full sm:w-auto sm:min-w-[280px] text-white"
+            >
+              <Compass className="w-5 h-5 mr-2" />
+              Start Your Analysis Now
+              <ArrowRight className="w-5 h-5 ml-2" />
+            </Button>
+            
+            <p className="text-muted-foreground text-xs sm:text-sm mt-4">
+              Takes only 5 minutes • Get instant results • Completely free
+            </p>
+          </div>
         </div>
       </section>
       
