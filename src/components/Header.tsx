@@ -31,7 +31,8 @@ const Header = () => {
   const navItems = [
     { label: "Home", path: "/", icon: Compass },
     { label: "Assessment", path: "/profile", icon: User },
-    { label: "Results", path: "/results", icon: BarChart3 }
+    { label: "Results", path: "/results", icon: BarChart3 },
+    { label: "Resume Builder", path: "/resume-builder", icon: Shield }
   ];
 
   return (

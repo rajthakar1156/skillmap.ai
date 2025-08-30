@@ -122,10 +122,11 @@ const Index = () => {
               <Button 
                 variant="outline" 
                 size="xl"
+                onClick={() => navigate('/resume-builder')}
                 className="min-w-[200px] h-12 text-lg font-medium rounded-lg border-2 hover:bg-secondary transition-all duration-300"
               >
                 <Play className="w-5 h-5 mr-2" />
-                Watch Demo
+                Build Resume
               </Button>
             </motion.div>
             
