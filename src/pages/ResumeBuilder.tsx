@@ -175,83 +175,178 @@ export default function ResumeBuilder() {
     const data = form.getValues();
     const pdf = new jsPDF();
     
-    // Header
-    pdf.setFontSize(24);
+    // Helper function to check if we need a new page
+    const checkPageBreak = (yPos: number, spaceNeeded: number = 20) => {
+      if (yPos + spaceNeeded > 280) {
+        pdf.addPage();
+        return 20;
+      }
+      return yPos;
+    };
+
+    // Helper function to add section header
+    const addSectionHeader = (title: string, yPos: number) => {
+      yPos = checkPageBreak(yPos, 30);
+      pdf.setFontSize(14);
+      pdf.setFont("helvetica", "bold");
+      pdf.setTextColor(40, 40, 40);
+      pdf.text(title.toUpperCase(), 20, yPos);
+      
+      // Add underline
+      pdf.setLineWidth(0.5);
+      pdf.setDrawColor(40, 40, 40);
+      pdf.line(20, yPos + 2, 190, yPos + 2);
+      
+      return yPos + 12;
+    };
+
+    // Header Section with Professional Layout
+    pdf.setFontSize(22);
     pdf.setFont("helvetica", "bold");
-    pdf.text(data.personalInfo.fullName, 20, 30);
+    pdf.setTextColor(20, 20, 20);
+    pdf.text(data.personalInfo.fullName.toUpperCase(), 20, 25);
     
-    pdf.setFontSize(12);
+    // Contact Information
+    pdf.setFontSize(10);
     pdf.setFont("helvetica", "normal");
-    pdf.text(`${data.personalInfo.email} | ${data.personalInfo.phone} | ${data.personalInfo.location}`, 20, 40);
+    pdf.setTextColor(60, 60, 60);
+    const contactLine1 = `${data.personalInfo.email} • ${data.personalInfo.phone}`;
+    const contactLine2 = `${data.personalInfo.location}${data.personalInfo.linkedin ? ' • ' + data.personalInfo.linkedin : ''}${data.personalInfo.github ? ' • ' + data.personalInfo.github : ''}`;
     
-    let yPosition = 60;
+    pdf.text(contactLine1, 20, 35);
+    pdf.text(contactLine2, 20, 43);
+    
+    let yPosition = 55;
     
     // Professional Summary
-    pdf.setFontSize(16);
-    pdf.setFont("helvetica", "bold");
-    pdf.text("Professional Summary", 20, yPosition);
-    yPosition += 10;
-    
-    pdf.setFontSize(11);
+    yPosition = addSectionHeader("Professional Summary", yPosition);
+    pdf.setFontSize(10);
     pdf.setFont("helvetica", "normal");
+    pdf.setTextColor(40, 40, 40);
     const summaryLines = pdf.splitTextToSize(data.summary, 170);
     pdf.text(summaryLines, 20, yPosition);
-    yPosition += summaryLines.length * 5 + 10;
+    yPosition += summaryLines.length * 4.5 + 8;
     
-    // Skills
-    pdf.setFontSize(16);
-    pdf.setFont("helvetica", "bold");
-    pdf.text("Skills", 20, yPosition);
-    yPosition += 10;
-    
-    pdf.setFontSize(11);
+    // Core Competencies (Skills)
+    yPosition = addSectionHeader("Core Competencies", yPosition);
+    pdf.setFontSize(10);
     pdf.setFont("helvetica", "normal");
-    pdf.text(data.skills.join(", "), 20, yPosition);
-    yPosition += 15;
+    pdf.setTextColor(40, 40, 40);
     
-    // Experience
-    pdf.setFontSize(16);
-    pdf.setFont("helvetica", "bold");
-    pdf.text("Experience", 20, yPosition);
-    yPosition += 10;
+    // Format skills in columns for better presentation
+    const skillsPerLine = 3;
+    const skillsText = data.skills.join(" • ");
+    const skillLines = pdf.splitTextToSize(skillsText, 170);
+    pdf.text(skillLines, 20, yPosition);
+    yPosition += skillLines.length * 4.5 + 8;
     
-    data.experience.forEach((exp) => {
-      pdf.setFontSize(12);
-      pdf.setFont("helvetica", "bold");
-      pdf.text(`${exp.title} - ${exp.company}`, 20, yPosition);
-      yPosition += 8;
+    // Professional Experience
+    yPosition = addSectionHeader("Professional Experience", yPosition);
+    
+    data.experience.forEach((exp, index) => {
+      yPosition = checkPageBreak(yPosition, 40);
       
-      pdf.setFontSize(10);
-      pdf.setFont("helvetica", "italic");
-      pdf.text(exp.duration, 20, yPosition);
-      yPosition += 8;
-      
+      // Job Title and Company
       pdf.setFontSize(11);
+      pdf.setFont("helvetica", "bold");
+      pdf.setTextColor(20, 20, 20);
+      pdf.text(`${exp.title}`, 20, yPosition);
+      
+      // Company and Duration on same line
       pdf.setFont("helvetica", "normal");
-      const descLines = pdf.splitTextToSize(exp.description, 170);
-      pdf.text(descLines, 20, yPosition);
-      yPosition += descLines.length * 5 + 8;
+      pdf.setTextColor(40, 40, 40);
+      pdf.text(`${exp.company} | ${exp.duration}`, 120, yPosition);
+      yPosition += 7;
+      
+      // Job Description
+      pdf.setFontSize(10);
+      pdf.setFont("helvetica", "normal");
+      pdf.setTextColor(40, 40, 40);
+      const descLines = pdf.splitTextToSize(`• ${exp.description}`, 165);
+      pdf.text(descLines, 25, yPosition);
+      yPosition += descLines.length * 4.5 + 6;
     });
+    
+    // Projects
+    if (data.projects && data.projects.length > 0) {
+      yPosition = addSectionHeader("Key Projects", yPosition);
+      
+      data.projects.forEach((project) => {
+        yPosition = checkPageBreak(yPosition, 30);
+        
+        // Project Name
+        pdf.setFontSize(11);
+        pdf.setFont("helvetica", "bold");
+        pdf.setTextColor(20, 20, 20);
+        pdf.text(project.name, 20, yPosition);
+        yPosition += 6;
+        
+        // Technologies
+        pdf.setFontSize(9);
+        pdf.setFont("helvetica", "italic");
+        pdf.setTextColor(60, 60, 60);
+        pdf.text(`Technologies: ${project.technologies}`, 20, yPosition);
+        yPosition += 5;
+        
+        // Project Description
+        pdf.setFontSize(10);
+        pdf.setFont("helvetica", "normal");
+        pdf.setTextColor(40, 40, 40);
+        const projDescLines = pdf.splitTextToSize(`• ${project.description}`, 165);
+        pdf.text(projDescLines, 25, yPosition);
+        yPosition += projDescLines.length * 4.5 + 6;
+      });
+    }
     
     // Education
-    pdf.setFontSize(16);
-    pdf.setFont("helvetica", "bold");
-    pdf.text("Education", 20, yPosition);
-    yPosition += 10;
+    yPosition = addSectionHeader("Education", yPosition);
     
     data.education.forEach((edu) => {
-      pdf.setFontSize(12);
-      pdf.setFont("helvetica", "bold");
-      pdf.text(`${edu.degree} - ${edu.institution}`, 20, yPosition);
-      yPosition += 8;
+      yPosition = checkPageBreak(yPosition, 20);
       
-      pdf.setFontSize(10);
+      pdf.setFontSize(11);
+      pdf.setFont("helvetica", "bold");
+      pdf.setTextColor(20, 20, 20);
+      pdf.text(edu.degree, 20, yPosition);
+      
       pdf.setFont("helvetica", "normal");
-      pdf.text(`${edu.year}${edu.gpa ? ` | GPA: ${edu.gpa}` : ""}`, 20, yPosition);
-      yPosition += 12;
+      pdf.setTextColor(40, 40, 40);
+      pdf.text(`${edu.institution} | ${edu.year}${edu.gpa ? ` | GPA: ${edu.gpa}` : ""}`, 120, yPosition);
+      yPosition += 8;
     });
     
-    pdf.save(`${data.personalInfo.fullName}_Resume.pdf`);
+    // Achievements
+    if (data.achievements && data.achievements.length > 0) {
+      yPosition = addSectionHeader("Achievements & Recognition", yPosition);
+      
+      data.achievements.forEach((achievement) => {
+        yPosition = checkPageBreak(yPosition, 15);
+        
+        pdf.setFontSize(10);
+        pdf.setFont("helvetica", "normal");
+        pdf.setTextColor(40, 40, 40);
+        const achLines = pdf.splitTextToSize(`• ${achievement}`, 165);
+        pdf.text(achLines, 25, yPosition);
+        yPosition += achLines.length * 4.5 + 3;
+      });
+    }
+    
+    // Footer with professional note
+    const pageCount = pdf.internal.pages.length - 1; // -1 because pages array includes empty first element
+    for (let i = 1; i <= pageCount; i++) {
+      pdf.setPage(i);
+      pdf.setFontSize(8);
+      pdf.setFont("helvetica", "italic");
+      pdf.setTextColor(100, 100, 100);
+      pdf.text(`${data.personalInfo.fullName} - ${data.careerPath} Resume`, 20, 290);
+      pdf.text(`Page ${i} of ${pageCount}`, 170, 290);
+    }
+    
+    // Generate filename with timestamp
+    const timestamp = new Date().toISOString().split('T')[0];
+    const filename = `${data.personalInfo.fullName.replace(/\s+/g, '_')}_Resume_${timestamp}.pdf`;
+    
+    pdf.save(filename);
   };
 
   const onSubmit = (data: ResumeData) => {
