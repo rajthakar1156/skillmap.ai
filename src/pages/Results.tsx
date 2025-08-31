@@ -1,192 +1,425 @@
-import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { 
+  BookOpen, 
+  Briefcase, 
+  Filter, 
+  MapPin, 
+  Clock, 
+  DollarSign, 
+  ExternalLink,
+  Star,
+  Users,
+  Calendar,
+  Loader2,
+  AlertCircle
+} from "lucide-react";
+
+import Header from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { ArrowLeft, TrendingUp, MapPin, Users, Star, Briefcase, DollarSign } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
-interface CareerRecommendation {
-  career_title: string;
-  career_description: string;
-  day_in_the_life: string;
-  market_relevance_india: {
-    demand: string;
-    salary_range_lpa: string;
-    future_scope: string;
-  };
-  top_sectors_india: string[];
-  alignment_justification: string;
+interface Course {
+  id: string;
+  title: string;
+  description: string;
+  platform: string;
+  platformLogo: string;
+  difficulty: "Beginner" | "Intermediate" | "Advanced";
+  duration: string;
+  price: number;
+  isFree: boolean;
+  rating: number;
+  studentsCount: number;
+  instructorName: string;
+  courseUrl: string;
+  aiRecommended: boolean;
 }
 
-interface ProfileData {
-  academics: {
-    class_12_stream: string;
-    key_subjects_score: { [key: string]: number };
-  };
-  interests: string[];
-  personality: {
-    type: string;
-    strong_traits: string[];
-  };
-  extracurriculars: string[];
-  values: string[];
+interface Job {
+  id: string;
+  title: string;
+  company: string;
+  location: string;
+  salaryMin?: number;
+  salaryMax?: number;
+  experienceLevel: "Entry Level" | "Mid Level" | "Senior Level";
+  jobType: "Remote" | "Onsite" | "Hybrid";
+  description: string;
+  postedDate: string;
+  applyUrl: string;
+  aiRecommended: boolean;
 }
 
-const Results = () => {
+// Mock data for demonstration
+const mockCourses: Course[] = [
+  {
+    id: "1",
+    title: "Complete Python Bootcamp: Go from Zero to Hero in Python",
+    description: "Learn Python programming from basics to advanced concepts including data structures, OOP, and web development.",
+    platform: "Udemy",
+    platformLogo: "/api/placeholder/40/40",
+    difficulty: "Beginner",
+    duration: "22 hours",
+    price: 3499,
+    isFree: false,
+    rating: 4.6,
+    studentsCount: 150000,
+    instructorName: "Jose Portilla",
+    courseUrl: "https://udemy.com/course/complete-python-bootcamp",
+    aiRecommended: true
+  },
+  {
+    id: "2",
+    title: "Machine Learning Specialization",
+    description: "Learn the fundamentals of machine learning with Andrew Ng in this comprehensive specialization.",
+    platform: "Coursera",
+    platformLogo: "/api/placeholder/40/40",
+    difficulty: "Intermediate",
+    duration: "3 months",
+    price: 0,
+    isFree: true,
+    rating: 4.9,
+    studentsCount: 500000,
+    instructorName: "Andrew Ng",
+    courseUrl: "https://coursera.org/specializations/machine-learning",
+    aiRecommended: true
+  },
+  {
+    id: "3",
+    title: "React - The Complete Guide",
+    description: "Learn React.js from scratch! Learn Reactjs, Hooks, Redux, React Routing, Animations, Next.js and way more!",
+    platform: "Udemy",
+    platformLogo: "/api/placeholder/40/40",
+    difficulty: "Intermediate",
+    duration: "48 hours",
+    price: 3999,
+    isFree: false,
+    rating: 4.7,
+    studentsCount: 180000,
+    instructorName: "Maximilian Schwarzmüller",
+    courseUrl: "https://udemy.com/course/react-the-complete-guide",
+    aiRecommended: false
+  }
+];
+
+const mockJobs: Job[] = [
+  {
+    id: "1",
+    title: "Junior Data Scientist",
+    company: "TechCorp India",
+    location: "Bangalore, India",
+    salaryMin: 600000,
+    salaryMax: 1000000,
+    experienceLevel: "Entry Level",
+    jobType: "Hybrid",
+    description: "We are looking for a passionate Junior Data Scientist to join our growing analytics team...",
+    postedDate: "2024-01-15",
+    applyUrl: "https://techcorp.careers/data-scientist-jr",
+    aiRecommended: true
+  },
+  {
+    id: "2",
+    title: "Frontend Developer (React)",
+    company: "StartupXYZ",
+    location: "Mumbai, India",
+    salaryMin: 500000,
+    salaryMax: 800000,
+    experienceLevel: "Mid Level",
+    jobType: "Remote",
+    description: "Join our dynamic team as a Frontend Developer working with React, TypeScript, and modern web technologies...",
+    postedDate: "2024-01-14",
+    applyUrl: "https://startupxyz.com/careers/frontend-dev",
+    aiRecommended: true
+  },
+  {
+    id: "3",
+    title: "Product Manager",
+    company: "InnovateTech",
+    location: "Delhi, India",
+    salaryMin: 1200000,
+    salaryMax: 2000000,
+    experienceLevel: "Senior Level",
+    jobType: "Onsite",
+    description: "We're seeking an experienced Product Manager to lead our mobile app product strategy...",
+    postedDate: "2024-01-13",
+    applyUrl: "https://innovatetech.in/jobs/product-manager",
+    aiRecommended: false
+  }
+];
+
+export default function Results() {
+  const location = useLocation();
   const navigate = useNavigate();
-  const [recommendations, setRecommendations] = useState<CareerRecommendation[]>([]);
-  const [profileData, setProfileData] = useState<ProfileData | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  
+  // Get career path from navigation state or URL params
+  const careerPath = location.state?.careerPath || "Data Scientist";
+  
+  // Course filters
+  const [courseFilters, setCourseFilters] = useState({
+    priceType: "all", // all, free, paid
+    difficulty: "all", // all, beginner, intermediate, advanced
+    duration: "all" // all, short, medium, long
+  });
+  
+  // Job filters
+  const [jobFilters, setJobFilters] = useState({
+    location: "all",
+    experienceLevel: "all",
+    jobType: "all"
+  });
+  
+  const [courses, setCourses] = useState<Course[]>([]);
+  const [jobs, setJobs] = useState<Job[]>([]);
+  const [filteredCourses, setFilteredCourses] = useState<Course[]>([]);
+  const [filteredJobs, setFilteredJobs] = useState<Job[]>([]);
 
+  // Simulate API calls
   useEffect(() => {
-    const storedData = localStorage.getItem('profileData');
-    if (!storedData) {
-      navigate('/profile');
-      return;
-    }
-
-    const data: ProfileData = JSON.parse(storedData);
-    setProfileData(data);
-    
-    // Simulate AI processing and generate recommendations
-    generateRecommendations(data);
-  }, [navigate]);
-
-  const generateRecommendations = (data: ProfileData) => {
-    setLoading(true);
-    
-    // Simulate API call delay
-    setTimeout(() => {
-      const recommendations = analyzeProfile(data);
-      setRecommendations(recommendations);
-      setLoading(false);
-    }, 2000);
-  };
-
-  const analyzeProfile = (data: ProfileData): CareerRecommendation[] => {
-    const { academics, interests, personality, values } = data;
-    
-    // Simple recommendation logic based on the profile
-    const recs: CareerRecommendation[] = [];
-    
-    if (academics.class_12_stream === "Science (PCM)") {
-      if (interests.some(i => ["technology", "video games", "solving puzzles"].includes(i))) {
-        recs.push({
-          career_title: "Software Engineer",
-          career_description: "Design, develop, and maintain software applications and systems that power our digital world.",
-          day_in_the_life: "Start your day reviewing code from teammates, attend a brief standup meeting, spend focused time coding new features, collaborate on architecture decisions, debug issues, and wrap up with planning tomorrow's sprint goals.",
-          market_relevance_india: {
-            demand: "Extremely high with continuous growth in IT sector",
-            salary_range_lpa: "₹6L - ₹12L (Entry Level), ₹20L+ (Experienced)",
-            future_scope: "Excellent, with increasing digitalization across all industries"
-          },
-          top_sectors_india: ["IT Services", "Product Companies", "FinTech", "E-commerce"],
-          alignment_justification: `Your strong performance in Math (${academics.key_subjects_score.Math || 'N/A'}%) and Physics, combined with interests in technology and problem-solving, make you ideal for software engineering.`
-        });
-      }
+    const fetchData = async () => {
+      setIsLoading(true);
+      setError(null);
       
-      if (values.includes("innovation") || interests.includes("sci-fi movies")) {
-        recs.push({
-          career_title: "Data Scientist",
-          career_description: "Extract insights from data to drive business decisions and create intelligent systems.",
-          day_in_the_life: "Analyze large datasets, build predictive models, create visualizations, collaborate with business teams to understand requirements, and present findings to stakeholders.",
-          market_relevance_india: {
-            demand: "Very high across all sectors",
-            salary_range_lpa: "₹8L - ₹15L (Entry Level), ₹25L+ (Experienced)",
-            future_scope: "Exceptional growth with AI/ML revolution"
-          },
-          top_sectors_india: ["Tech Companies", "Banking", "Healthcare", "Retail"],
-          alignment_justification: `Your analytical nature and strong math skills align perfectly with data science. Your interest in technology and innovation matches the field's cutting-edge nature.`
-        });
+      try {
+        // Simulate API delay
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        
+        // In a real implementation, you would fetch data from APIs here
+        setCourses(mockCourses);
+        setJobs(mockJobs);
+        setFilteredCourses(mockCourses);
+        setFilteredJobs(mockJobs);
+      } catch (err) {
+        setError("Failed to load recommendations. Please try again.");
+      } finally {
+        setIsLoading(false);
       }
-    }
+    };
     
-    if (academics.class_12_stream === "Science (PCB)") {
-      recs.push({
-        career_title: "Biomedical Engineer",
-        career_description: "Combine engineering principles with biological sciences to develop medical devices and solutions.",
-        day_in_the_life: "Design medical equipment, run tests on prototypes, collaborate with doctors and researchers, analyze biological data, and ensure compliance with medical regulations.",
-        market_relevance_india: {
-          demand: "Growing rapidly with healthcare expansion",
-          salary_range_lpa: "₹5L - ₹10L (Entry Level), ₹18L+ (Experienced)",
-          future_scope: "Strong growth with medical technology advancement"
-        },
-        top_sectors_india: ["Healthcare", "Medical Devices", "Pharmaceuticals", "Research"],
-        alignment_justification: `Your science background with PCB stream and analytical traits make you well-suited for biomedical engineering.`
-      });
-    }
-    
-    if (academics.class_12_stream === "Commerce") {
-      recs.push({
-        career_title: "Financial Analyst",
-        career_description: "Analyze financial data to help organizations make informed investment and business decisions.",
-        day_in_the_life: "Review market trends, create financial models, prepare reports, analyze company performance, and advise on investment opportunities.",
-        market_relevance_india: {
-          demand: "High demand in growing financial sector",
-          salary_range_lpa: "₹4L - ₹8L (Entry Level), ₹15L+ (Experienced)",
-          future_scope: "Stable growth with expanding financial markets"
-        },
-        top_sectors_india: ["Banking", "Investment Firms", "Corporate Finance", "Consulting"],
-        alignment_justification: `Your commerce background and analytical personality are perfect for financial analysis roles.`
-      });
-    }
-    
-    // Add a third recommendation based on personality and values
-    if (personality.strong_traits.includes("creative") || values.includes("creativity")) {
-      recs.push({
-        career_title: "UX/UI Designer",
-        career_description: "Create intuitive and beautiful digital experiences that users love to interact with.",
-        day_in_the_life: "Research user needs, create wireframes and prototypes, design interfaces, collaborate with developers, conduct user testing, and iterate on designs based on feedback.",
-        market_relevance_india: {
-          demand: "Very high with digital transformation boom",
-          salary_range_lpa: "₹5L - ₹10L (Entry Level), ₹20L+ (Experienced)",
-          future_scope: "Excellent with growing focus on user experience"
-        },
-        top_sectors_india: ["Tech Companies", "Digital Agencies", "E-commerce", "Startups"],
-        alignment_justification: `Your creative traits and interest in technology combine perfectly for UX/UI design, where you can solve problems through beautiful, functional design.`
-      });
-    } else if (values.includes("helping others") || personality.strong_traits.includes("empathetic")) {
-      recs.push({
-        career_title: "Product Manager",
-        career_description: "Bridge the gap between business needs and technical solutions to create products that users love.",
-        day_in_the_life: "Define product roadmaps, gather requirements from stakeholders, work with engineering teams, analyze user feedback, and make strategic decisions about product features.",
-        market_relevance_india: {
-          demand: "Very high across all tech companies",
-          salary_range_lpa: "₹10L - ₹18L (Entry Level), ₹30L+ (Experienced)",
-          future_scope: "Exceptional growth in product-focused companies"
-        },
-        top_sectors_india: ["Technology", "Startups", "E-commerce", "SaaS"],
-        alignment_justification: `Your empathetic nature and analytical skills make you ideal for understanding user needs and translating them into successful products.`
-      });
-    }
-    
-    // Ensure we have at least 3 recommendations
-    if (recs.length < 3) {
-      recs.push({
-        career_title: "Management Consultant",
-        career_description: "Help organizations solve complex business problems and improve their performance.",
-        day_in_the_life: "Analyze business challenges, develop strategic solutions, present recommendations to clients, lead implementation projects, and build strong client relationships.",
-        market_relevance_india: {
-          demand: "High demand from growing businesses",
-          salary_range_lpa: "₹8L - ₹15L (Entry Level), ₹25L+ (Experienced)",
-          future_scope: "Strong growth with business expansion needs"
-        },
-        top_sectors_india: ["Consulting Firms", "Corporate Strategy", "Technology", "Healthcare"],
-        alignment_justification: `Your analytical and problem-solving abilities align well with consulting, where you can help businesses overcome challenges and grow.`
-      });
-    }
-    
-    return recs.slice(0, 3);
-  };
+    fetchData();
+  }, [careerPath]);
 
-  if (loading) {
+  // Filter courses
+  useEffect(() => {
+    let filtered = courses;
+    
+    if (courseFilters.priceType === "free") {
+      filtered = filtered.filter(course => course.isFree);
+    } else if (courseFilters.priceType === "paid") {
+      filtered = filtered.filter(course => !course.isFree);
+    }
+    
+    if (courseFilters.difficulty !== "all") {
+      filtered = filtered.filter(course => 
+        course.difficulty.toLowerCase() === courseFilters.difficulty
+      );
+    }
+    
+    setFilteredCourses(filtered);
+  }, [courses, courseFilters]);
+
+  // Filter jobs
+  useEffect(() => {
+    let filtered = jobs;
+    
+    if (jobFilters.experienceLevel !== "all") {
+      filtered = filtered.filter(job => 
+        job.experienceLevel.toLowerCase().replace(" ", "-") === jobFilters.experienceLevel
+      );
+    }
+    
+    if (jobFilters.jobType !== "all") {
+      filtered = filtered.filter(job => 
+        job.jobType.toLowerCase() === jobFilters.jobType
+      );
+    }
+    
+    setFilteredJobs(filtered);
+  }, [jobs, jobFilters]);
+
+  const CourseCard = ({ course }: { course: Course }) => (
+    <Card className="group hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+      <CardHeader className="pb-3">
+        <div className="flex items-start justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 bg-muted rounded-lg flex items-center justify-center">
+              <BookOpen className="w-6 h-6 text-primary" />
+            </div>
+            <div>
+              <Badge variant="secondary" className="text-xs">
+                {course.platform}
+              </Badge>
+              {course.aiRecommended && (
+                <Badge variant="default" className="ml-2 text-xs bg-gradient-to-r from-primary to-primary/80">
+                  AI Recommended
+                </Badge>
+              )}
+            </div>
+          </div>
+          <Badge 
+            variant={course.difficulty === "Beginner" ? "default" : 
+                   course.difficulty === "Intermediate" ? "secondary" : "destructive"}
+          >
+            {course.difficulty}
+          </Badge>
+        </div>
+        <CardTitle className="text-lg line-clamp-2 group-hover:text-primary transition-colors">
+          {course.title}
+        </CardTitle>
+        <CardDescription className="line-clamp-2">
+          {course.description}
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="pt-0">
+        <div className="flex items-center gap-4 text-sm text-muted-foreground mb-4">
+          <div className="flex items-center gap-1">
+            <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+            <span>{course.rating}</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <Users className="w-4 h-4" />
+            <span>{course.studentsCount.toLocaleString()}</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <Clock className="w-4 h-4" />
+            <span>{course.duration}</span>
+          </div>
+        </div>
+        
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            {course.isFree ? (
+              <Badge variant="outline" className="text-green-600 border-green-600">
+                Free
+              </Badge>
+            ) : (
+              <span className="font-semibold text-lg">₹{course.price.toLocaleString()}</span>
+            )}
+          </div>
+          <Button size="sm" className="group-hover:scale-105 transition-transform">
+            View Course
+            <ExternalLink className="w-4 h-4 ml-2" />
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+
+  const JobCard = ({ job }: { job: Job }) => (
+    <Card className="group hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+      <CardHeader className="pb-3">
+        <div className="flex items-start justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 bg-muted rounded-lg flex items-center justify-center">
+              <Briefcase className="w-6 h-6 text-primary" />
+            </div>
+            <div>
+              {job.aiRecommended && (
+                <Badge variant="default" className="text-xs bg-gradient-to-r from-primary to-primary/80">
+                  AI Recommended
+                </Badge>
+              )}
+            </div>
+          </div>
+          <Badge variant="outline">{job.jobType}</Badge>
+        </div>
+        <CardTitle className="text-lg group-hover:text-primary transition-colors">
+          {job.title}
+        </CardTitle>
+        <CardDescription className="flex items-center gap-2">
+          <span className="font-medium">{job.company}</span>
+          <span>•</span>
+          <span className="flex items-center gap-1">
+            <MapPin className="w-3 h-3" />
+            {job.location}
+          </span>
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="pt-0">
+        <div className="space-y-3">
+          <div className="flex items-center gap-4 text-sm text-muted-foreground">
+            {job.salaryMin && job.salaryMax && (
+              <div className="flex items-center gap-1">
+                <DollarSign className="w-4 h-4" />
+                <span>₹{(job.salaryMin/100000).toFixed(0)}-{(job.salaryMax/100000).toFixed(0)}L</span>
+              </div>
+            )}
+            <Badge variant="secondary" className="text-xs">
+              {job.experienceLevel}
+            </Badge>
+            <div className="flex items-center gap-1">
+              <Calendar className="w-4 h-4" />
+              <span>{new Date(job.postedDate).toLocaleDateString()}</span>
+            </div>
+          </div>
+          
+          <p className="text-sm text-muted-foreground line-clamp-2">
+            {job.description}
+          </p>
+          
+          <Button className="w-full group-hover:scale-105 transition-transform">
+            Apply Now
+            <ExternalLink className="w-4 h-4 ml-2" />
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+
+  const LoadingSkeleton = () => (
+    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      {Array.from({ length: 6 }).map((_, i) => (
+        <Card key={i}>
+          <CardHeader>
+            <div className="flex items-center gap-3">
+              <Skeleton className="w-12 h-12 rounded-lg" />
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-20" />
+                <Skeleton className="h-4 w-16" />
+              </div>
+            </div>
+            <Skeleton className="h-6 w-3/4" />
+            <Skeleton className="h-4 w-full" />
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              <div className="flex gap-2">
+                <Skeleton className="h-4 w-16" />
+                <Skeleton className="h-4 w-16" />
+                <Skeleton className="h-4 w-16" />
+              </div>
+              <div className="flex justify-between items-center">
+                <Skeleton className="h-6 w-20" />
+                <Skeleton className="h-9 w-24" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  );
+
+  if (!careerPath) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary mx-auto mb-4"></div>
-          <h2 className="text-2xl font-semibold mb-2">Analyzing Your Profile</h2>
-          <p className="text-muted-foreground">Our AI is crafting personalized career recommendations for you...</p>
+      <div className="min-h-screen bg-background">
+        <Header />
+        <div className="container mx-auto px-4 py-8">
+          <Alert>
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              No career path selected. Please complete the career assessment first.
+            </AlertDescription>
+          </Alert>
+          <Button onClick={() => navigate("/")} className="mt-4">
+            Take Assessment
+          </Button>
         </div>
       </div>
     );
@@ -194,163 +427,206 @@ const Results = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-8 max-w-6xl">
-        <Button 
-          variant="ghost" 
-          onClick={() => navigate('/profile')}
-          className="mb-6"
-        >
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Back to Profile
-        </Button>
-
+      <Header />
+      
+      <div className="container mx-auto px-4 py-8">
+        {/* Header Section */}
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold mb-4 bg-gradient-hero bg-clip-text text-transparent">
-            Your Career Recommendations
+          <h1 className="text-4xl font-bold mb-4">
+            Career Resources for <span className="text-primary">{careerPath}</span>
           </h1>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Based on your profile analysis, here are the top career paths perfectly suited for you
+          <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
+            Discover AI-curated courses and job opportunities tailored to your career path. 
+            Start learning today and take the next step in your professional journey.
           </p>
         </div>
 
-        {profileData && (
-          <Card className="mb-8 shadow-card">
-            <CardHeader>
-              <CardTitle>Profile Summary</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div>
-                  <h4 className="font-semibold text-sm text-muted-foreground mb-2">STREAM</h4>
-                  <Badge variant="outline">{profileData.academics.class_12_stream}</Badge>
-                </div>
-                <div>
-                  <h4 className="font-semibold text-sm text-muted-foreground mb-2">PERSONALITY</h4>
-                  <Badge variant="outline">{profileData.personality.type}</Badge>
-                </div>
-                <div>
-                  <h4 className="font-semibold text-sm text-muted-foreground mb-2">TOP INTERESTS</h4>
-                  <div className="flex flex-wrap gap-1">
-                    {profileData.interests.slice(0, 2).map(interest => (
-                      <Badge key={interest} variant="secondary" className="text-xs">
-                        {interest}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-                <div>
-                  <h4 className="font-semibold text-sm text-muted-foreground mb-2">VALUES</h4>
-                  <div className="flex flex-wrap gap-1">
-                    {profileData.values.slice(0, 2).map(value => (
-                      <Badge key={value} variant="secondary" className="text-xs">
-                        {value}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
+        <Tabs defaultValue="courses" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-2 max-w-md mx-auto">
+            <TabsTrigger value="courses" className="flex items-center gap-2">
+              <BookOpen className="w-4 h-4" />
+              Courses
+            </TabsTrigger>
+            <TabsTrigger value="jobs" className="flex items-center gap-2">
+              <Briefcase className="w-4 h-4" />
+              Jobs
+            </TabsTrigger>
+          </TabsList>
 
-        <div className="space-y-8">
-          {recommendations.map((rec, index) => (
-            <Card key={index} className="shadow-elegant hover:shadow-glow transition-all duration-300 animate-fade-in">
+          {/* Courses Tab */}
+          <TabsContent value="courses" className="space-y-6">
+            {/* Course Filters */}
+            <Card>
               <CardHeader>
-                <div className="flex items-start justify-between">
-                  <div>
-                    <CardTitle className="text-2xl flex items-center gap-2">
-                      <Star className="w-6 h-6 text-accent" />
-                      {rec.career_title}
-                      <Badge className="ml-2">#{index + 1} Match</Badge>
-                    </CardTitle>
-                    <CardDescription className="text-base mt-2">
-                      {rec.career_description}
-                    </CardDescription>
-                  </div>
-                </div>
+                <CardTitle className="flex items-center gap-2">
+                  <Filter className="w-5 h-5" />
+                  Filter Courses
+                </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-6">
-                <div>
-                  <h4 className="font-semibold flex items-center gap-2 mb-3">
-                    <Briefcase className="w-4 h-4 text-primary" />
-                    A Day in Your Life
-                  </h4>
-                  <p className="text-muted-foreground leading-relaxed">
-                    {rec.day_in_the_life}
-                  </p>
-                </div>
-
-                <Separator />
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <CardContent>
+                <div className="grid gap-4 md:grid-cols-3">
                   <div>
-                    <h4 className="font-semibold flex items-center gap-2 mb-3">
-                      <TrendingUp className="w-4 h-4 text-secondary" />
-                      Market Relevance in India
-                    </h4>
-                    <div className="space-y-2">
-                      <div>
-                        <span className="text-sm font-medium text-muted-foreground">Demand:</span>
-                        <p className="text-sm">{rec.market_relevance_india.demand}</p>
-                      </div>
-                      <div>
-                        <span className="text-sm font-medium text-muted-foreground flex items-center gap-1">
-                          <DollarSign className="w-3 h-3" />
-                          Salary Range:
-                        </span>
-                        <p className="text-sm font-medium text-secondary">{rec.market_relevance_india.salary_range_lpa}</p>
-                      </div>
-                      <div>
-                        <span className="text-sm font-medium text-muted-foreground">Future Scope:</span>
-                        <p className="text-sm">{rec.market_relevance_india.future_scope}</p>
-                      </div>
-                    </div>
+                    <label className="text-sm font-medium mb-2 block">Price</label>
+                    <Select 
+                      value={courseFilters.priceType} 
+                      onValueChange={(value) => setCourseFilters(prev => ({ ...prev, priceType: value }))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Courses</SelectItem>
+                        <SelectItem value="free">Free Only</SelectItem>
+                        <SelectItem value="paid">Paid Only</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
-
+                  
                   <div>
-                    <h4 className="font-semibold flex items-center gap-2 mb-3">
-                      <Users className="w-4 h-4 text-accent" />
-                      Top Sectors in India
-                    </h4>
-                    <div className="flex flex-wrap gap-2">
-                      {rec.top_sectors_india.map(sector => (
-                        <Badge key={sector} variant="outline" className="text-xs">
-                          {sector}
-                        </Badge>
-                      ))}
-                    </div>
+                    <label className="text-sm font-medium mb-2 block">Difficulty</label>
+                    <Select 
+                      value={courseFilters.difficulty} 
+                      onValueChange={(value) => setCourseFilters(prev => ({ ...prev, difficulty: value }))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Levels</SelectItem>
+                        <SelectItem value="beginner">Beginner</SelectItem>
+                        <SelectItem value="intermediate">Intermediate</SelectItem>
+                        <SelectItem value="advanced">Advanced</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
-                </div>
-
-                <Separator />
-
-                <div>
-                  <h4 className="font-semibold flex items-center gap-2 mb-3">
-                    <MapPin className="w-4 h-4 text-primary" />
-                    Why This Matches You
-                  </h4>
-                  <p className="text-muted-foreground leading-relaxed bg-muted/50 p-4 rounded-lg">
-                    {rec.alignment_justification}
-                  </p>
+                  
+                  <div>
+                    <label className="text-sm font-medium mb-2 block">Duration</label>
+                    <Select 
+                      value={courseFilters.duration} 
+                      onValueChange={(value) => setCourseFilters(prev => ({ ...prev, duration: value }))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">Any Duration</SelectItem>
+                        <SelectItem value="short">Short (0-10 hours)</SelectItem>
+                        <SelectItem value="medium">Medium (10-50 hours)</SelectItem>
+                        <SelectItem value="long">Long (50+ hours)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
               </CardContent>
             </Card>
-          ))}
-        </div>
 
-        <div className="text-center mt-12">
-          <Button 
-            variant="premium" 
-            size="lg"
-            onClick={() => navigate('/')}
-          >
-            Explore More Career Paths
-          </Button>
-        </div>
+            {/* Course Results */}
+            {isLoading ? (
+              <LoadingSkeleton />
+            ) : error ? (
+              <Alert variant="destructive">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            ) : (
+              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                {filteredCourses.map((course) => (
+                  <CourseCard key={course.id} course={course} />
+                ))}
+              </div>
+            )}
+          </TabsContent>
+
+          {/* Jobs Tab */}
+          <TabsContent value="jobs" className="space-y-6">
+            {/* Job Filters */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Filter className="w-5 h-5" />
+                  Filter Jobs
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid gap-4 md:grid-cols-3">
+                  <div>
+                    <label className="text-sm font-medium mb-2 block">Experience Level</label>
+                    <Select 
+                      value={jobFilters.experienceLevel} 
+                      onValueChange={(value) => setJobFilters(prev => ({ ...prev, experienceLevel: value }))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Levels</SelectItem>
+                        <SelectItem value="entry-level">Entry Level</SelectItem>
+                        <SelectItem value="mid-level">Mid Level</SelectItem>
+                        <SelectItem value="senior-level">Senior Level</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div>
+                    <label className="text-sm font-medium mb-2 block">Job Type</label>
+                    <Select 
+                      value={jobFilters.jobType} 
+                      onValueChange={(value) => setJobFilters(prev => ({ ...prev, jobType: value }))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Types</SelectItem>
+                        <SelectItem value="remote">Remote</SelectItem>
+                        <SelectItem value="onsite">Onsite</SelectItem>
+                        <SelectItem value="hybrid">Hybrid</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div>
+                    <label className="text-sm font-medium mb-2 block">Location</label>
+                    <Select 
+                      value={jobFilters.location} 
+                      onValueChange={(value) => setJobFilters(prev => ({ ...prev, location: value }))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Locations</SelectItem>
+                        <SelectItem value="bangalore">Bangalore</SelectItem>
+                        <SelectItem value="mumbai">Mumbai</SelectItem>
+                        <SelectItem value="delhi">Delhi</SelectItem>
+                        <SelectItem value="hyderabad">Hyderabad</SelectItem>
+                        <SelectItem value="pune">Pune</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Job Results */}
+            {isLoading ? (
+              <LoadingSkeleton />
+            ) : error ? (
+              <Alert variant="destructive">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            ) : (
+              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                {filteredJobs.map((job) => (
+                  <JobCard key={job.id} job={job} />
+                ))}
+              </div>
+            )}
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );
-};
-
-export default Results;
+}
