@@ -2,9 +2,10 @@ import React, { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { Plus, Download, Lightbulb, ArrowLeft, ArrowRight } from "lucide-react";
+import { Plus, Download, Lightbulb, ArrowLeft, ArrowRight, Eye, Palette } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import jsPDF from "jspdf";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -53,6 +54,41 @@ const resumeSchema = z.object({
 
 type ResumeData = z.infer<typeof resumeSchema>;
 
+// Resume template types
+type ResumeTemplate = "modern" | "professional" | "creative";
+
+interface TemplateConfig {
+  name: string;
+  description: string;
+  primaryColor: [number, number, number];
+  accentColor: [number, number, number];
+  headerStyle: "centered" | "left" | "banner";
+}
+
+const templates: Record<ResumeTemplate, TemplateConfig> = {
+  modern: {
+    name: "Modern",
+    description: "Clean and contemporary design",
+    primaryColor: [33, 150, 243], // Blue
+    accentColor: [69, 90, 100], // Dark blue-grey
+    headerStyle: "centered"
+  },
+  professional: {
+    name: "Professional",
+    description: "Traditional business style",
+    primaryColor: [76, 175, 80], // Green
+    accentColor: [55, 71, 79], // Dark grey
+    headerStyle: "left"
+  },
+  creative: {
+    name: "Creative",
+    description: "Modern with accent colors",
+    primaryColor: [156, 39, 176], // Purple
+    accentColor: [103, 58, 183], // Deep purple
+    headerStyle: "banner"
+  }
+};
+
 const careerPaths = [
   "Data Scientist",
   "Web Developer",
@@ -86,6 +122,7 @@ export default function ResumeBuilder() {
   const [currentStep, setCurrentStep] = useState(0);
   const [selectedCareer, setSelectedCareer] = useState("");
   const [showPreview, setShowPreview] = useState(false);
+  const [selectedTemplate, setSelectedTemplate] = useState<ResumeTemplate>("modern");
 
   const form = useForm<ResumeData>({
     resolver: zodResolver(resumeSchema),
@@ -174,6 +211,12 @@ export default function ResumeBuilder() {
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
   const [pdfError, setPdfError] = useState<string | null>(null);
 
+  // Add custom font loading
+  const loadCustomFont = (pdf: jsPDF) => {
+    // Use system fonts that are widely available and ATS-friendly
+    pdf.setFont("helvetica"); // Default to Helvetica (similar to Arial)
+  };
+
   const generatePDF = async () => {
     try {
       setIsGeneratingPdf(true);
@@ -186,16 +229,26 @@ export default function ResumeBuilder() {
         throw new Error("Please fill in all required personal information fields");
       }
       
+      toast.loading("Generating your professional resume...");
+      
+      // Get template configuration
+      const template = templates[selectedTemplate];
+      
       const pdf = new jsPDF({
         orientation: 'portrait',
         unit: 'mm',
-        format: 'a4'
+        format: 'a4',
+        putOnlyUsedFonts: true,
+        compress: true
       });
+      
+      // Load custom fonts
+      loadCustomFont(pdf);
       
       // Set margins and page dimensions
       const pageWidth = pdf.internal.pageSize.getWidth();
       const pageHeight = pdf.internal.pageSize.getHeight();
-      const margin = 15;
+      const margin = template.headerStyle === "banner" ? 12 : 15;
       const contentWidth = pageWidth - (margin * 2);
       
       // Helper function to check if we need a new page
@@ -207,52 +260,127 @@ export default function ResumeBuilder() {
         return yPos;
       };
 
-      // Helper function to add section header with ATS-friendly formatting
+      // Helper function to add section header with template-specific styling
       const addSectionHeader = (title: string, yPos: number) => {
         yPos = checkPageBreak(yPos, 20);
+        
+        // Template-specific header styling
+        if (selectedTemplate === "creative") {
+          // Background bar for creative template
+          pdf.setFillColor(...template.accentColor);
+          pdf.rect(margin, yPos - 4, contentWidth, 8, 'F');
+          pdf.setTextColor(255, 255, 255); // White text on colored background
+        } else {
+          pdf.setTextColor(...template.primaryColor);
+        }
+        
         pdf.setFontSize(12);
         pdf.setFont("helvetica", "bold");
-        pdf.setTextColor(0, 0, 0); // Pure black for ATS
-        pdf.text(title.toUpperCase(), margin, yPos);
+        pdf.text(title.toUpperCase(), margin + (selectedTemplate === "creative" ? 2 : 0), yPos);
         
-        // Add subtle line under header
-        pdf.setLineWidth(0.3);
-        pdf.setDrawColor(0, 0, 0);
-        pdf.line(margin, yPos + 2, pageWidth - margin, yPos + 2);
+        // Add line under header (except for creative template)
+        if (selectedTemplate !== "creative") {
+          pdf.setLineWidth(0.5);
+          pdf.setDrawColor(...template.primaryColor);
+          pdf.line(margin, yPos + 2, pageWidth - margin, yPos + 2);
+        }
         
-        return yPos + 8;
+        return yPos + (selectedTemplate === "creative" ? 10 : 8);
       };
 
-      // Header Section - ATS-Optimized
-      pdf.setFontSize(18);
-      pdf.setFont("helvetica", "bold");
-      pdf.setTextColor(0, 0, 0);
+      // Header Section - Template-specific styling
+      let yPosition = 20;
       
-      // Center the name
-      const nameWidth = pdf.getTextWidth(data.personalInfo.fullName.toUpperCase());
-      const nameX = (pageWidth - nameWidth) / 2;
-      pdf.text(data.personalInfo.fullName.toUpperCase(), nameX, 25);
-      
-      // Contact Information - Centered and Professional
-      pdf.setFontSize(10);
-      pdf.setFont("helvetica", "normal");
-      pdf.setTextColor(0, 0, 0);
-      
-      const contactInfo = [
-        data.personalInfo.email,
-        data.personalInfo.phone,
-        data.personalInfo.location
-      ].filter(Boolean);
-      
-      if (data.personalInfo.linkedin) contactInfo.push(data.personalInfo.linkedin);
-      if (data.personalInfo.github) contactInfo.push(data.personalInfo.github);
-      
-      const contactLine = contactInfo.join(" | ");
-      const contactWidth = pdf.getTextWidth(contactLine);
-      const contactX = (pageWidth - contactWidth) / 2;
-      pdf.text(contactLine, contactX, 35);
-      
-      let yPosition = 50;
+      if (template.headerStyle === "banner") {
+        // Banner style header with background
+        pdf.setFillColor(...template.primaryColor);
+        pdf.rect(0, 0, pageWidth, 40, 'F');
+        
+        pdf.setFontSize(20);
+        pdf.setFont("helvetica", "bold");
+        pdf.setTextColor(255, 255, 255);
+        
+        const nameWidth = pdf.getTextWidth(data.personalInfo.fullName.toUpperCase());
+        const nameX = (pageWidth - nameWidth) / 2;
+        pdf.text(data.personalInfo.fullName.toUpperCase(), nameX, 18);
+        
+        pdf.setFontSize(10);
+        pdf.setFont("helvetica", "normal");
+        
+        const contactInfo = [
+          data.personalInfo.email,
+          data.personalInfo.phone,
+          data.personalInfo.location
+        ].filter(Boolean);
+        
+        if (data.personalInfo.linkedin) contactInfo.push(data.personalInfo.linkedin);
+        if (data.personalInfo.github) contactInfo.push(data.personalInfo.github);
+        
+        const contactLine = contactInfo.join(" | ");
+        const contactWidth = pdf.getTextWidth(contactLine);
+        const contactX = (pageWidth - contactWidth) / 2;
+        pdf.text(contactLine, contactX, 28);
+        
+        yPosition = 50;
+      } else if (template.headerStyle === "centered") {
+        // Centered header
+        pdf.setFontSize(20);
+        pdf.setFont("helvetica", "bold");
+        pdf.setTextColor(...template.primaryColor);
+        
+        const nameWidth = pdf.getTextWidth(data.personalInfo.fullName.toUpperCase());
+        const nameX = (pageWidth - nameWidth) / 2;
+        pdf.text(data.personalInfo.fullName.toUpperCase(), nameX, 25);
+        
+        pdf.setFontSize(10);
+        pdf.setFont("helvetica", "normal");
+        pdf.setTextColor(0, 0, 0);
+        
+        const contactInfo = [
+          data.personalInfo.email,
+          data.personalInfo.phone,
+          data.personalInfo.location
+        ].filter(Boolean);
+        
+        if (data.personalInfo.linkedin) contactInfo.push(data.personalInfo.linkedin);
+        if (data.personalInfo.github) contactInfo.push(data.personalInfo.github);
+        
+        const contactLine = contactInfo.join(" | ");
+        const contactWidth = pdf.getTextWidth(contactLine);
+        const contactX = (pageWidth - contactWidth) / 2;
+        pdf.text(contactLine, contactX, 35);
+        
+        yPosition = 50;
+      } else {
+        // Left-aligned header
+        pdf.setFontSize(20);
+        pdf.setFont("helvetica", "bold");
+        pdf.setTextColor(...template.primaryColor);
+        pdf.text(data.personalInfo.fullName.toUpperCase(), margin, 25);
+        
+        pdf.setFontSize(10);
+        pdf.setFont("helvetica", "normal");
+        pdf.setTextColor(0, 0, 0);
+        
+        const contactInfo = [
+          data.personalInfo.email,
+          data.personalInfo.phone,
+          data.personalInfo.location
+        ];
+        
+        contactInfo.forEach((info, index) => {
+          pdf.text(info, margin, 35 + (index * 4));
+        });
+        
+        if (data.personalInfo.linkedin) {
+          pdf.text(data.personalInfo.linkedin, margin, 35 + (contactInfo.length * 4));
+        }
+        if (data.personalInfo.github) {
+          pdf.text(data.personalInfo.github, margin, 35 + ((contactInfo.length + 1) * 4));
+        }
+        
+        yPosition = 55 + (contactInfo.length * 4);
+      }
       
       // Career Objective - ATS-Friendly Section
       yPosition = addSectionHeader("Career Objective", yPosition);
@@ -424,45 +552,57 @@ export default function ResumeBuilder() {
         pdf.text(`Skills Alignment Score: ${skillsMatch}% match for ${data.careerPath}`, margin, yPosition);
       }
       
-      // Footer - Professional and ATS-friendly
+      // Footer - Professional and template-styled
       const pageCount = pdf.internal.pages.length - 1;
       for (let i = 1; i <= pageCount; i++) {
         pdf.setPage(i);
         pdf.setFontSize(8);
         pdf.setFont("helvetica", "normal");
-        pdf.setTextColor(100, 100, 100);
+        pdf.setTextColor(...template.accentColor);
         
-        const footerText = `${data.personalInfo.fullName} - ${data.careerPath || 'Professional'} Resume`;
-        const footerWidth = pdf.getTextWidth(footerText);
-        const footerX = (pageWidth - footerWidth) / 2;
-        pdf.text(footerText, footerX, pageHeight - 10);
+        // Left footer: Generated by skillmap.ai
+        pdf.text("Generated by skillmap.ai", margin, pageHeight - 8);
         
+        // Center footer: Name and title
+        const centerText = `${data.personalInfo.fullName} - ${data.careerPath || 'Professional'} Resume`;
+        const centerWidth = pdf.getTextWidth(centerText);
+        const centerX = (pageWidth - centerWidth) / 2;
+        pdf.text(centerText, centerX, pageHeight - 8);
+        
+        // Right footer: Page number
         const pageText = `Page ${i} of ${pageCount}`;
         const pageTextWidth = pdf.getTextWidth(pageText);
-        pdf.text(pageText, pageWidth - margin - pageTextWidth, pageHeight - 10);
+        pdf.text(pageText, pageWidth - margin - pageTextWidth, pageHeight - 8);
       }
       
       // Generate filename
       const timestamp = new Date().toISOString().split('T')[0];
-      const sanitizedName = data.personalInfo.fullName.replace(/[^a-zA-Z0-9]/g, '_');
-      const filename = `CareerJyoti_${sanitizedName}_Resume_${timestamp}.pdf`;
-      
-      // Save the PDF
+      const filename = `SkillMap_Resume_${data.personalInfo.fullName.replace(/\s+/g, '_')}_${timestamp}.pdf`;
       pdf.save(filename);
       
-      // Success message
-      setPdfError(null);
-      
+      toast.success("Resume downloaded successfully! 🎉");
+      console.log("PDF generated successfully");
     } catch (error) {
-      console.error('PDF Generation Error:', error);
-      setPdfError(error instanceof Error ? error.message : 'Failed to generate PDF. Please try again.');
+      console.error("Error generating PDF:", error);
+      const errorMessage = error instanceof Error ? error.message : "Failed to generate PDF. Please try again.";
+      setPdfError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setIsGeneratingPdf(false);
     }
   };
 
+  // Quick regeneration function
+  const quickRegenerate = () => {
+    if (showPreview) {
+      generatePDF();
+    }
+  };
+
   const onSubmit = (data: ResumeData) => {
+    console.log("Form submitted:", data);
     setShowPreview(true);
+    toast.success("Resume preview ready! You can now download your PDF.");
   };
 
   const nextStep = () => {
@@ -478,10 +618,8 @@ export default function ResumeBuilder() {
   };
 
   const getSuggestions = () => {
-    if (selectedCareer && aiSuggestions[selectedCareer as keyof typeof aiSuggestions]) {
-      return aiSuggestions[selectedCareer as keyof typeof aiSuggestions];
-    }
-    return null;
+    const watchedCareer = form.watch("careerPath");
+    return aiSuggestions[watchedCareer as keyof typeof aiSuggestions];
   };
 
   const renderStepContent = () => {
@@ -540,7 +678,7 @@ export default function ResumeBuilder() {
                   <FormItem>
                     <FormLabel>Location</FormLabel>
                     <FormControl>
-                      <Input placeholder="New York, NY" {...field} />
+                      <Input placeholder="City, State" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -586,37 +724,31 @@ export default function ResumeBuilder() {
               name="careerPath"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Select Your Target Career Path</FormLabel>
-                  <Select onValueChange={(value) => {
-                    field.onChange(value);
-                    setSelectedCareer(value);
-                  }} defaultValue={field.value}>
-                    <FormControl>
+                  <FormLabel>Target Career Path</FormLabel>
+                  <FormControl>
+                    <Select
+                      onValueChange={(value) => {
+                        field.onChange(value);
+                        setSelectedCareer(value);
+                      }}
+                      value={field.value}
+                    >
                       <SelectTrigger>
-                        <SelectValue placeholder="Choose a career path" />
+                        <SelectValue placeholder="Select your target career" />
                       </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {careerPaths.map((path) => (
-                        <SelectItem key={path} value={path}>
-                          {path}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                      <SelectContent>
+                        {careerPaths.map((path) => (
+                          <SelectItem key={path} value={path}>
+                            {path}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            
-            {selectedCareer && getSuggestions() && (
-              <Alert>
-                <Lightbulb className="h-4 w-4" />
-                <AlertDescription>
-                  <strong>AI Suggestion:</strong> For {selectedCareer} roles, consider highlighting these key skills: {getSuggestions()?.skills.slice(0, 5).join(", ")}
-                </AlertDescription>
-              </Alert>
-            )}
           </div>
         );
 
@@ -630,9 +762,9 @@ export default function ResumeBuilder() {
                 <FormItem>
                   <FormLabel>Professional Summary</FormLabel>
                   <FormControl>
-                    <Textarea 
-                      placeholder="Write a compelling professional summary that highlights your key strengths and career objectives..."
-                      className="min-h-32"
+                    <Textarea
+                      placeholder="Write a compelling professional summary..."
+                      className="min-h-[120px]"
                       {...field}
                     />
                   </FormControl>
@@ -640,155 +772,153 @@ export default function ResumeBuilder() {
                 </FormItem>
               )}
             />
-            
-            {selectedCareer && getSuggestions() && (
-              <Alert>
-                <Lightbulb className="h-4 w-4" />
-                <AlertDescription>
-                  <strong>AI Tip:</strong> Include these keywords in your summary: {getSuggestions()?.keywords.join(", ")}
-                </AlertDescription>
-              </Alert>
-            )}
           </div>
         );
 
       case "education":
-        const educationEntries = form.watch("education");
+        const educationFields = form.watch("education");
         return (
           <div className="space-y-6">
-            <div className="flex justify-between items-center">
-              <h3 className="text-lg font-semibold">Education</h3>
-              <Button type="button" onClick={addEducation} variant="outline" size="sm">
-                <Plus className="h-4 w-4 mr-2" />
-                Add Education
-              </Button>
-            </div>
-            
-            {educationEntries.map((_, index) => (
-              <Card key={index}>
-                <CardContent className="pt-6">
-                  <div className="grid grid-cols-2 gap-4 mb-4">
-                    <FormField
-                      control={form.control}
-                      name={`education.${index}.degree`}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Degree</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Bachelor of Science" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name={`education.${index}.institution`}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Institution</FormLabel>
-                          <FormControl>
-                            <Input placeholder="University Name" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <FormField
-                      control={form.control}
-                      name={`education.${index}.year`}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Graduation Year</FormLabel>
-                          <FormControl>
-                            <Input placeholder="2023" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name={`education.${index}.gpa`}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>GPA (Optional)</FormLabel>
-                          <FormControl>
-                            <Input placeholder="3.8" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                  {educationEntries.length > 1 && (
+            {educationFields.map((_, index) => (
+              <div key={index} className="border p-4 rounded-lg">
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-lg font-medium">Education {index + 1}</h3>
+                  {educationFields.length > 1 && (
                     <Button
                       type="button"
-                      variant="destructive"
+                      variant="outline"
                       size="sm"
-                      className="mt-4"
                       onClick={() => removeEducation(index)}
                     >
                       Remove
                     </Button>
                   )}
-                </CardContent>
-              </Card>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name={`education.${index}.degree`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Degree</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Bachelor of Computer Science" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name={`education.${index}.institution`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Institution</FormLabel>
+                        <FormControl>
+                          <Input placeholder="University Name" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4 mt-4">
+                  <FormField
+                    control={form.control}
+                    name={`education.${index}.year`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Year</FormLabel>
+                        <FormControl>
+                          <Input placeholder="2020-2024" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name={`education.${index}.gpa`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>GPA (Optional)</FormLabel>
+                        <FormControl>
+                          <Input placeholder="3.8/4.0" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
             ))}
+            <Button
+              type="button"
+              variant="outline"
+              onClick={addEducation}
+              className="flex items-center gap-2"
+            >
+              <Plus className="w-4 h-4" />
+              Add Education
+            </Button>
           </div>
         );
 
       case "skills":
-        const skills = form.watch("skills");
+        const suggestions = getSuggestions();
+        const currentSkills = form.watch("skills");
+        
         return (
           <div className="space-y-6">
             <div>
-              <h3 className="text-lg font-semibold mb-4">Skills</h3>
-              <div className="space-y-4">
-                <div>
-                  <Input
-                    placeholder="Add a skill and press Enter"
-                    onKeyPress={(e) => {
-                      if (e.key === "Enter") {
-                        e.preventDefault();
-                        const value = e.currentTarget.value.trim();
-                        if (value) {
-                          addSkill(value);
-                          e.currentTarget.value = "";
-                        }
+              <h3 className="text-lg font-medium mb-4">Your Skills</h3>
+              <div className="flex flex-wrap gap-2 mb-4">
+                {currentSkills.map((skill, index) => (
+                  <Badge
+                    key={index}
+                    variant="secondary"
+                    className="flex items-center gap-1"
+                  >
+                    {skill}
+                    <button
+                      type="button"
+                      onClick={() => removeSkill(skill)}
+                      className="ml-1 text-xs"
+                    >
+                      ×
+                    </button>
+                  </Badge>
+                ))}
+              </div>
+              <div className="flex gap-2">
+                <Input
+                  placeholder="Add a skill..."
+                  onKeyPress={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      const input = e.target as HTMLInputElement;
+                      if (input.value.trim()) {
+                        addSkill(input.value.trim());
+                        input.value = "";
                       }
-                    }}
-                  />
-                </div>
-                
-                {skills.length > 0 && (
-                  <div className="flex flex-wrap gap-2">
-                    {skills.map((skill, index) => (
-                      <Badge
-                        key={index}
-                        variant="secondary"
-                        className="cursor-pointer"
-                        onClick={() => removeSkill(skill)}
-                      >
-                        {skill} ×
-                      </Badge>
-                    ))}
-                  </div>
-                )}
+                    }
+                  }}
+                />
               </div>
             </div>
-            
-            {selectedCareer && getSuggestions() && (
-              <Alert>
-                <Lightbulb className="h-4 w-4" />
-                <AlertDescription>
-                  <strong>AI Suggestions:</strong> Consider adding these skills for {selectedCareer}:
-                  <div className="mt-2 flex flex-wrap gap-1">
-                    {getSuggestions()?.skills.map((skill) => (
+
+            {suggestions && (
+              <div>
+                <div className="flex items-center gap-2 mb-3">
+                  <Lightbulb className="w-5 h-5 text-yellow-500" />
+                  <h3 className="text-lg font-medium">AI Suggestions for {selectedCareer}</h3>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {suggestions.skills
+                    .filter(skill => !currentSkills.includes(skill))
+                    .map((skill, index) => (
                       <Badge
-                        key={skill}
+                        key={index}
                         variant="outline"
                         className="cursor-pointer hover:bg-primary hover:text-primary-foreground"
                         onClick={() => addSkill(skill)}
@@ -796,71 +926,75 @@ export default function ResumeBuilder() {
                         + {skill}
                       </Badge>
                     ))}
-                  </div>
-                </AlertDescription>
-              </Alert>
+                </div>
+              </div>
             )}
           </div>
         );
 
       case "experience":
-        const experienceEntries = form.watch("experience");
+        const experienceFields = form.watch("experience");
         return (
           <div className="space-y-6">
-            <div className="flex justify-between items-center">
-              <h3 className="text-lg font-semibold">Work Experience</h3>
-              <Button type="button" onClick={addExperience} variant="outline" size="sm">
-                <Plus className="h-4 w-4 mr-2" />
-                Add Experience
-              </Button>
-            </div>
-            
-            {experienceEntries.map((_, index) => (
-              <Card key={index}>
-                <CardContent className="pt-6">
-                  <div className="grid grid-cols-2 gap-4 mb-4">
-                    <FormField
-                      control={form.control}
-                      name={`experience.${index}.title`}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Job Title</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Software Engineer" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name={`experience.${index}.company`}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Company</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Tech Corp" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                  <div className="mb-4">
-                    <FormField
-                      control={form.control}
-                      name={`experience.${index}.duration`}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Duration</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Jan 2022 - Present" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
+            {experienceFields.map((_, index) => (
+              <div key={index} className="border p-4 rounded-lg">
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-lg font-medium">Experience {index + 1}</h3>
+                  {experienceFields.length > 1 && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => removeExperience(index)}
+                    >
+                      Remove
+                    </Button>
+                  )}
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name={`experience.${index}.title`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Job Title</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Software Developer" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name={`experience.${index}.company`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Company</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Tech Company Inc." {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                <div className="mt-4">
+                  <FormField
+                    control={form.control}
+                    name={`experience.${index}.duration`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Duration</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Jan 2022 - Present" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                <div className="mt-4">
                   <FormField
                     control={form.control}
                     name={`experience.${index}.description`}
@@ -869,7 +1003,7 @@ export default function ResumeBuilder() {
                         <FormLabel>Description</FormLabel>
                         <FormControl>
                           <Textarea
-                            placeholder="Describe your key responsibilities and achievements..."
+                            placeholder="Describe your responsibilities and achievements..."
                             {...field}
                           />
                         </FormControl>
@@ -877,81 +1011,67 @@ export default function ResumeBuilder() {
                       </FormItem>
                     )}
                   />
-                  {experienceEntries.length > 1 && (
-                    <Button
-                      type="button"
-                      variant="destructive"
-                      size="sm"
-                      className="mt-4"
-                      onClick={() => removeExperience(index)}
-                    >
-                      Remove
-                    </Button>
-                  )}
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             ))}
+            <Button
+              type="button"
+              variant="outline"
+              onClick={addExperience}
+              className="flex items-center gap-2"
+            >
+              <Plus className="w-4 h-4" />
+              Add Experience
+            </Button>
           </div>
         );
 
       case "projects":
-        const projectEntries = form.watch("projects");
+        const projectFields = form.watch("projects");
         return (
           <div className="space-y-6">
-            <div className="flex justify-between items-center">
-              <h3 className="text-lg font-semibold">Projects</h3>
-              <Button type="button" onClick={addProject} variant="outline" size="sm">
-                <Plus className="h-4 w-4 mr-2" />
-                Add Project
-              </Button>
-            </div>
-            
-            {projectEntries.map((_, index) => (
-              <Card key={index}>
-                <CardContent className="pt-6">
-                  <div className="grid grid-cols-2 gap-4 mb-4">
-                    <FormField
-                      control={form.control}
-                      name={`projects.${index}.name`}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Project Name</FormLabel>
-                          <FormControl>
-                            <Input placeholder="E-commerce Platform" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name={`projects.${index}.link`}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Project Link (Optional)</FormLabel>
-                          <FormControl>
-                            <Input placeholder="https://github.com/user/project" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                  <div className="mb-4">
-                    <FormField
-                      control={form.control}
-                      name={`projects.${index}.technologies`}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Technologies Used</FormLabel>
-                          <FormControl>
-                            <Input placeholder="React, Node.js, MongoDB" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
+            {projectFields.map((_, index) => (
+              <div key={index} className="border p-4 rounded-lg">
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-lg font-medium">Project {index + 1}</h3>
+                  {projectFields.length > 1 && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => removeProject(index)}
+                    >
+                      Remove
+                    </Button>
+                  )}
+                </div>
+                <div className="space-y-4">
+                  <FormField
+                    control={form.control}
+                    name={`projects.${index}.name`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Project Name</FormLabel>
+                        <FormControl>
+                          <Input placeholder="My Awesome Project" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name={`projects.${index}.technologies`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Technologies Used</FormLabel>
+                        <FormControl>
+                          <Input placeholder="React, Node.js, MongoDB" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                   <FormField
                     control={form.control}
                     name={`projects.${index}.description`}
@@ -960,7 +1080,7 @@ export default function ResumeBuilder() {
                         <FormLabel>Description</FormLabel>
                         <FormControl>
                           <Textarea
-                            placeholder="Describe the project and your contributions..."
+                            placeholder="Describe your project and its impact..."
                             {...field}
                           />
                         </FormControl>
@@ -968,72 +1088,71 @@ export default function ResumeBuilder() {
                       </FormItem>
                     )}
                   />
-                  {projectEntries.length > 1 && (
-                    <Button
-                      type="button"
-                      variant="destructive"
-                      size="sm"
-                      className="mt-4"
-                      onClick={() => removeProject(index)}
-                    >
-                      Remove
-                    </Button>
-                  )}
-                </CardContent>
-              </Card>
+                  <FormField
+                    control={form.control}
+                    name={`projects.${index}.link`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Project Link (Optional)</FormLabel>
+                        <FormControl>
+                          <Input placeholder="https://github.com/username/project" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
             ))}
+            <Button
+              type="button"
+              variant="outline"
+              onClick={addProject}
+              className="flex items-center gap-2"
+            >
+              <Plus className="w-4 h-4" />
+              Add Project
+            </Button>
           </div>
         );
 
       case "achievements":
-        const achievements = form.watch("achievements");
+        const currentAchievements = form.watch("achievements");
         return (
           <div className="space-y-6">
             <div>
-              <h3 className="text-lg font-semibold mb-4">Achievements</h3>
-              <div className="space-y-4">
-                <div>
-                  <Input
-                    placeholder="Add an achievement and press Enter"
-                    onKeyPress={(e) => {
-                      if (e.key === "Enter") {
-                        e.preventDefault();
-                        const value = e.currentTarget.value.trim();
-                        if (value) {
-                          addAchievement(value);
-                          e.currentTarget.value = "";
-                        }
-                      }
-                    }}
-                  />
-                </div>
-                
-                {achievements.length > 0 && (
-                  <div className="space-y-2">
-                    {achievements.map((achievement, index) => (
-                      <div key={index} className="flex items-center justify-between bg-muted p-3 rounded-md">
-                        <span>{achievement}</span>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => removeAchievement(index)}
-                        >
-                          ×
-                        </Button>
-                      </div>
-                    ))}
+              <h3 className="text-lg font-medium mb-4">Achievements & Awards</h3>
+              <div className="space-y-2 mb-4">
+                {currentAchievements.map((achievement, index) => (
+                  <div key={index} className="flex items-center justify-between p-2 bg-muted rounded">
+                    <span>{achievement}</span>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => removeAchievement(index)}
+                    >
+                      Remove
+                    </Button>
                   </div>
-                )}
+                ))}
+              </div>
+              <div className="flex gap-2">
+                <Input
+                  placeholder="Add an achievement..."
+                  onKeyPress={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      const input = e.target as HTMLInputElement;
+                      if (input.value.trim()) {
+                        addAchievement(input.value.trim());
+                        input.value = "";
+                      }
+                    }
+                  }}
+                />
               </div>
             </div>
-            
-            <Alert>
-              <Lightbulb className="h-4 w-4" />
-              <AlertDescription>
-                <strong>AI Tip:</strong> Include specific, quantifiable achievements like "Increased sales by 25%" or "Led a team of 5 developers"
-              </AlertDescription>
-            </Alert>
           </div>
         );
 
@@ -1042,106 +1161,198 @@ export default function ResumeBuilder() {
     }
   };
 
-  const ResumePreview = ({ data }: { data: ResumeData }) => (
-    <div className="bg-white text-black p-8 max-w-4xl mx-auto shadow-lg">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">{data.personalInfo.fullName}</h1>
-        <p className="text-gray-600">
-          {data.personalInfo.email} | {data.personalInfo.phone} | {data.personalInfo.location}
-        </p>
-        {(data.personalInfo.linkedin || data.personalInfo.github) && (
-          <p className="text-blue-600">
-            {data.personalInfo.linkedin && `LinkedIn: ${data.personalInfo.linkedin}`}
-            {data.personalInfo.linkedin && data.personalInfo.github && " | "}
-            {data.personalInfo.github && `GitHub: ${data.personalInfo.github}`}
-          </p>
-        )}
-      </div>
+  // Resume Preview Component
+  function ResumePreview({ data, template = "modern" }: { data: ResumeData; template?: ResumeTemplate }) {
+    const templateConfig = templates[template];
+    const primaryColor = `rgb(${templateConfig.primaryColor.join(',')})`;
+    const accentColor = `rgb(${templateConfig.accentColor.join(',')})`;
 
-      <div className="mb-6">
-        <h2 className="text-xl font-bold text-gray-900 mb-2 border-b-2 border-gray-300">
-          Professional Summary
-        </h2>
-        <p className="text-gray-700">{data.summary}</p>
-      </div>
+    if (!data.personalInfo.fullName) {
+      return (
+        <div className="text-center text-muted-foreground py-8">
+          Fill in the form to see your resume preview
+        </div>
+      );
+    }
 
-      <div className="mb-6">
-        <h2 className="text-xl font-bold text-gray-900 mb-2 border-b-2 border-gray-300">
-          Skills
-        </h2>
-        <p className="text-gray-700">{data.skills.join(", ")}</p>
-      </div>
-
-      <div className="mb-6">
-        <h2 className="text-xl font-bold text-gray-900 mb-2 border-b-2 border-gray-300">
-          Experience
-        </h2>
-        {data.experience.map((exp, index) => (
-          <div key={index} className="mb-4">
-            <div className="flex justify-between items-start">
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900">{exp.title}</h3>
-                <p className="text-gray-700 font-medium">{exp.company}</p>
-              </div>
-              <p className="text-gray-600 italic">{exp.duration}</p>
-            </div>
-            <p className="text-gray-700 mt-2">{exp.description}</p>
-          </div>
-        ))}
-      </div>
-
-      <div className="mb-6">
-        <h2 className="text-xl font-bold text-gray-900 mb-2 border-b-2 border-gray-300">
-          Projects
-        </h2>
-        {data.projects.map((project, index) => (
-          <div key={index} className="mb-4">
-            <div className="flex justify-between items-start">
-              <h3 className="text-lg font-semibold text-gray-900">{project.name}</h3>
-              {project.link && (
-                <a href={project.link} className="text-blue-600 underline">
-                  View Project
-                </a>
+    return (
+      <div className="bg-white rounded-lg shadow-lg max-w-4xl mx-auto overflow-hidden" style={{ fontFamily: 'Arial, Helvetica, sans-serif' }}>
+        {/* Header - Template specific */}
+        {templateConfig.headerStyle === "banner" ? (
+          <div className="text-center p-6 text-white mb-6" style={{ backgroundColor: primaryColor }}>
+            <h1 className="text-3xl font-bold mb-2">{data.personalInfo.fullName}</h1>
+            <div className="text-sm space-y-1">
+              <div>{data.personalInfo.email} | {data.personalInfo.phone} | {data.personalInfo.location}</div>
+              {(data.personalInfo.linkedin || data.personalInfo.github) && (
+                <div>
+                  {[data.personalInfo.linkedin, data.personalInfo.github].filter(Boolean).join(" | ")}
+                </div>
               )}
             </div>
-            <p className="text-gray-600 italic">{project.technologies}</p>
-            <p className="text-gray-700 mt-2">{project.description}</p>
           </div>
-        ))}
-      </div>
-
-      <div className="mb-6">
-        <h2 className="text-xl font-bold text-gray-900 mb-2 border-b-2 border-gray-300">
-          Education
-        </h2>
-        {data.education.map((edu, index) => (
-          <div key={index} className="mb-3">
-            <div className="flex justify-between items-start">
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900">{edu.degree}</h3>
-                <p className="text-gray-700">{edu.institution}</p>
-              </div>
-              <div className="text-right">
-                <p className="text-gray-600">{edu.year}</p>
-                {edu.gpa && <p className="text-gray-600">GPA: {edu.gpa}</p>}
-              </div>
+        ) : templateConfig.headerStyle === "centered" ? (
+          <div className="text-center mb-8 p-6 border-b">
+            <h1 className="text-3xl font-bold mb-2" style={{ color: primaryColor }}>{data.personalInfo.fullName}</h1>
+            <div className="text-sm text-gray-600 space-y-1">
+              <div>{data.personalInfo.email} | {data.personalInfo.phone} | {data.personalInfo.location}</div>
+              {(data.personalInfo.linkedin || data.personalInfo.github) && (
+                <div>
+                  {[data.personalInfo.linkedin, data.personalInfo.github].filter(Boolean).join(" | ")}
+                </div>
+              )}
             </div>
           </div>
-        ))}
-      </div>
+        ) : (
+          <div className="mb-8 p-6 border-b">
+            <h1 className="text-3xl font-bold mb-3" style={{ color: primaryColor }}>{data.personalInfo.fullName}</h1>
+            <div className="text-sm text-gray-600 space-y-1">
+              <div>{data.personalInfo.email}</div>
+              <div>{data.personalInfo.phone}</div>
+              <div>{data.personalInfo.location}</div>
+              {data.personalInfo.linkedin && <div>{data.personalInfo.linkedin}</div>}
+              {data.personalInfo.github && <div>{data.personalInfo.github}</div>}
+            </div>
+          </div>
+        )}
 
-      <div>
-        <h2 className="text-xl font-bold text-gray-900 mb-2 border-b-2 border-gray-300">
-          Achievements
-        </h2>
-        <ul className="list-disc list-inside text-gray-700">
-          {data.achievements.map((achievement, index) => (
-            <li key={index}>{achievement}</li>
-          ))}
-        </ul>
+        {/* Professional Summary */}
+        {data.summary && (
+          <div className="mb-6 px-6">
+            <h2 
+              className="text-lg font-bold mb-2 border-b pb-1" 
+              style={{ 
+                color: primaryColor,
+                borderColor: template === "creative" ? primaryColor : '#ccc'
+              }}
+            >
+              PROFESSIONAL SUMMARY
+            </h2>
+            <p className="text-sm leading-relaxed text-gray-700">{data.summary}</p>
+          </div>
+        )}
+
+        {/* Skills */}
+        {data.skills && data.skills.length > 0 && (
+          <div className="mb-6 px-6">
+            <h2 
+              className="text-lg font-bold mb-2 border-b pb-1" 
+              style={{ 
+                color: primaryColor,
+                borderColor: template === "creative" ? primaryColor : '#ccc'
+              }}
+            >
+              TECHNICAL SKILLS
+            </h2>
+            <div className="text-sm text-gray-700">
+              <p>{data.skills.join(" • ")}</p>
+            </div>
+          </div>
+        )}
+
+        {/* Experience */}
+        {data.experience && data.experience.length > 0 && (
+          <div className="mb-6 px-6">
+            <h2 
+              className="text-lg font-bold mb-2 border-b pb-1" 
+              style={{ 
+                color: primaryColor,
+                borderColor: template === "creative" ? primaryColor : '#ccc'
+              }}
+            >
+              PROFESSIONAL EXPERIENCE
+            </h2>
+            {data.experience.map((exp, index) => (
+              <div key={index} className="mb-4">
+                <div className="flex justify-between items-start mb-1">
+                  <h3 className="font-bold text-sm" style={{ color: accentColor }}>{exp.title}</h3>
+                  <span className="text-xs text-gray-600">{exp.duration}</span>
+                </div>
+                <div className="text-sm text-gray-700 mb-1">{exp.company}</div>
+                <p className="text-sm leading-relaxed text-gray-700">• {exp.description}</p>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Education */}
+        {data.education && data.education.length > 0 && (
+          <div className="mb-6 px-6">
+            <h2 
+              className="text-lg font-bold mb-2 border-b pb-1" 
+              style={{ 
+                color: primaryColor,
+                borderColor: template === "creative" ? primaryColor : '#ccc'
+              }}
+            >
+              EDUCATION
+            </h2>
+            {data.education.map((edu, index) => (
+              <div key={index} className="mb-3">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h3 className="font-bold text-sm" style={{ color: accentColor }}>{edu.degree}</h3>
+                    <div className="text-sm text-gray-700">{edu.institution}</div>
+                    {edu.gpa && <div className="text-sm text-gray-600">GPA: {edu.gpa}</div>}
+                  </div>
+                  <span className="text-xs text-gray-600">{edu.year}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Projects */}
+        {data.projects && data.projects.length > 0 && (
+          <div className="mb-6 px-6">
+            <h2 
+              className="text-lg font-bold mb-2 border-b pb-1" 
+              style={{ 
+                color: primaryColor,
+                borderColor: template === "creative" ? primaryColor : '#ccc'
+              }}
+            >
+              KEY PROJECTS
+            </h2>
+            {data.projects.map((project, index) => (
+              <div key={index} className="mb-4">
+                <h3 className="font-bold text-sm" style={{ color: accentColor }}>{project.name}</h3>
+                <div className="text-xs text-gray-600 mb-1">Technologies: {project.technologies}</div>
+                <p className="text-sm leading-relaxed text-gray-700">• {project.description}</p>
+                {project.link && (
+                  <div className="text-xs mt-1" style={{ color: primaryColor }}>Link: {project.link}</div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Achievements */}
+        {data.achievements && data.achievements.length > 0 && (
+          <div className="mb-6 px-6">
+            <h2 
+              className="text-lg font-bold mb-2 border-b pb-1" 
+              style={{ 
+                color: primaryColor,
+                borderColor: template === "creative" ? primaryColor : '#ccc'
+              }}
+            >
+              ACHIEVEMENTS & RECOGNITION
+            </h2>
+            <ul className="text-sm space-y-1 text-gray-700">
+              {data.achievements.map((achievement, index) => (
+                <li key={index} className="leading-relaxed">• {achievement}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {/* Footer */}
+        <div className="mt-8 pt-4 border-t text-center text-xs text-gray-500 px-6">
+          Generated by skillmap.ai - Professional Resume Builder
+        </div>
       </div>
-    </div>
-  );
+    );
+  }
 
   if (showPreview) {
     const data = form.getValues();
@@ -1150,10 +1361,22 @@ export default function ResumeBuilder() {
         <Header />
         <div className="container mx-auto px-4 py-8">
           <div className="flex justify-between items-center mb-8">
-            <h1 className="text-3xl font-bold">Resume Preview</h1>
-            <div className="space-x-4">
+            <div>
+              <h1 className="text-3xl font-bold">Resume Preview - {templates[selectedTemplate].name} Template</h1>
+              <p className="text-muted-foreground">Professional, ATS-friendly resume ready for download</p>
+            </div>
+            <div className="flex gap-2">
               <Button variant="outline" onClick={() => setShowPreview(false)}>
+                <ArrowLeft className="h-4 w-4 mr-2" />
                 Edit Resume
+              </Button>
+              <Button
+                onClick={quickRegenerate}
+                variant="outline"
+                className="flex items-center gap-2"
+              >
+                <Eye className="w-4 h-4" />
+                Refresh Preview
               </Button>
               <Button 
                 onClick={generatePDF}
@@ -1168,22 +1391,56 @@ export default function ResumeBuilder() {
           
           {/* Error handling for PDF generation */}
           {pdfError && (
-            <Alert variant="destructive" className="mb-6">
-              <AlertDescription className="flex items-center justify-between">
+            <Alert className="mb-4 border-destructive">
+              <AlertDescription className="text-destructive flex items-center justify-between">
                 <span>{pdfError}</span>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
+                <Button
                   onClick={() => setPdfError(null)}
-                  className="ml-4"
+                  variant="outline"
+                  size="sm"
+                  className="ml-2"
                 >
-                  Dismiss
+                  Try Again
                 </Button>
               </AlertDescription>
             </Alert>
           )}
-          
-          <ResumePreview data={data} />
+
+          {/* Template Selection */}
+          <Card className="mb-6">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Palette className="w-5 h-5" />
+                Choose Template
+              </CardTitle>
+              <CardDescription>
+                Select a professional template for your resume
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {Object.entries(templates).map(([key, template]) => (
+                  <div
+                    key={key}
+                    className={`border rounded-lg p-4 cursor-pointer transition-all hover:shadow-md ${
+                      selectedTemplate === key ? "ring-2 ring-primary" : ""
+                    }`}
+                    onClick={() => setSelectedTemplate(key as ResumeTemplate)}
+                  >
+                    <div className="h-24 rounded mb-3 border" style={{
+                      background: `linear-gradient(135deg, rgb(${template.primaryColor.join(',')}), rgb(${template.accentColor.join(',')}))`
+                    }} />
+                    <h3 className="font-semibold">{template.name}</h3>
+                    <p className="text-sm text-muted-foreground">{template.description}</p>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          <div className="border rounded-lg p-4 bg-muted/20">
+            <ResumePreview data={data} template={selectedTemplate} />
+          </div>
         </div>
       </div>
     );
@@ -1252,6 +1509,40 @@ export default function ResumeBuilder() {
                   <CardContent>{renderStepContent()}</CardContent>
                 </Card>
 
+                {/* Template Selection */}
+                {currentStep === 0 && (
+                  <Card className="mt-6">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Palette className="w-5 h-5" />
+                        Choose Template
+                      </CardTitle>
+                      <CardDescription>
+                        Select a professional template for your resume
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        {Object.entries(templates).map(([key, template]) => (
+                          <div
+                            key={key}
+                            className={`border rounded-lg p-4 cursor-pointer transition-all hover:shadow-md ${
+                              selectedTemplate === key ? "ring-2 ring-primary" : ""
+                            }`}
+                            onClick={() => setSelectedTemplate(key as ResumeTemplate)}
+                          >
+                            <div className="h-24 rounded mb-3 border" style={{
+                              background: `linear-gradient(135deg, rgb(${template.primaryColor.join(',')}), rgb(${template.accentColor.join(',')}))`
+                            }} />
+                            <h3 className="font-semibold">{template.name}</h3>
+                            <p className="text-sm text-muted-foreground">{template.description}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
                 <div className="flex justify-between mt-6">
                   <Button
                     type="button"
@@ -1264,8 +1555,9 @@ export default function ResumeBuilder() {
                   </Button>
 
                   {currentStep === steps.length - 1 ? (
-                    <Button type="submit">
-                      Generate Resume
+                    <Button type="submit" className="flex items-center gap-2">
+                      <Eye className="w-4 h-4" />
+                      Preview Resume
                     </Button>
                   ) : (
                     <Button type="button" onClick={nextStep}>
