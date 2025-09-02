@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useCallback, useMemo } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -613,11 +613,11 @@ export default function ResumeBuilder() {
     }
   };
 
-  const onSubmit = (data: ResumeData) => {
+  const onSubmit = useCallback((data: ResumeData) => {
     console.log("Form submitted:", data);
     setShowPreview(true);
     toast.success("Resume preview ready! You can now download your PDF.");
-  };
+  }, []);
 
   const nextStep = () => {
     if (currentStep < steps.length - 1) {
@@ -631,10 +631,11 @@ export default function ResumeBuilder() {
     }
   };
 
-  const getSuggestions = () => {
+  // Memoize getSuggestions to prevent infinite re-renders
+  const getSuggestions = useCallback(() => {
     const watchedCareer = form.watch("careerPath");
     return aiSuggestions[watchedCareer as keyof typeof aiSuggestions];
-  };
+  }, [form.watch("careerPath")]);
 
   const renderStepContent = () => {
     const step = steps[currentStep];
@@ -1175,19 +1176,24 @@ export default function ResumeBuilder() {
     }
   };
 
-  // Resume Preview Component
-  function ResumePreview({ data, template = "modern" }: { data: ResumeData; template?: ResumeTemplate }) {
-    const templateConfig = templates[template];
-    const primaryColor = `rgb(${templateConfig.primaryColor.join(',')})`;
-    const accentColor = `rgb(${templateConfig.accentColor.join(',')})`;
+  // Memoized Resume Preview Component to prevent unnecessary re-renders
+  const ResumePreview = useMemo(() => {
+    console.log("ResumePreview: Creating memoized component");
+    
+    return function ResumePreviewComponent({ data, template = "modern" }: { data: ResumeData; template?: ResumeTemplate }) {
+      console.log("ResumePreview: Rendering with data:", !!data.personalInfo.fullName);
+      
+      const templateConfig = templates[template];
+      const primaryColor = `rgb(${templateConfig.primaryColor.join(',')})`;
+      const accentColor = `rgb(${templateConfig.accentColor.join(',')})`;
 
-    if (!data.personalInfo.fullName) {
-      return (
-        <div className="text-center text-muted-foreground py-8">
-          Fill in the form to see your resume preview
-        </div>
-      );
-    }
+      if (!data.personalInfo.fullName) {
+        return (
+          <div className="text-center text-muted-foreground py-8">
+            Fill in the form to see your resume preview
+          </div>
+        );
+      }
 
     return (
       <div className="bg-white rounded-lg shadow-lg max-w-4xl mx-auto overflow-hidden" style={{ fontFamily: 'Arial, Helvetica, sans-serif' }}>
@@ -1366,7 +1372,8 @@ export default function ResumeBuilder() {
         </div>
       </div>
     );
-  }
+    };
+  }, []);
 
   if (showPreview) {
     const data = form.getValues();
