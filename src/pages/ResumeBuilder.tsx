@@ -578,10 +578,24 @@ export default function ResumeBuilder() {
       // Generate filename
       const timestamp = new Date().toISOString().split('T')[0];
       const filename = `SkillMap_Resume_${data.personalInfo.fullName.replace(/\s+/g, '_')}_${timestamp}.pdf`;
-      pdf.save(filename);
       
-      toast.success("Resume downloaded successfully! 🎉");
-      console.log("PDF generated successfully");
+      // Create blob and open in new tab for preview and download
+      const pdfOutput = pdf.output('blob');
+      const blobUrl = URL.createObjectURL(pdfOutput);
+      
+      // Open PDF in new tab
+      const newTab = window.open(blobUrl, '_blank');
+      if (newTab) {
+        newTab.document.title = filename;
+      }
+      
+      // Clean up the blob URL after a delay to prevent memory leaks
+      setTimeout(() => {
+        URL.revokeObjectURL(blobUrl);
+      }, 100000); // 100 seconds should be enough for the user to view/download
+      
+      toast.success("Resume opened in new tab! You can view and download it from there. 🎉");
+      console.log("PDF generated and opened in new tab successfully");
     } catch (error) {
       console.error("Error generating PDF:", error);
       const errorMessage = error instanceof Error ? error.message : "Failed to generate PDF. Please try again.";
