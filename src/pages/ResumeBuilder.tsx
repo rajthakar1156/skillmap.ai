@@ -219,20 +219,24 @@ export default function ResumeBuilder() {
 
   const generatePDF = async () => {
     try {
+      console.log("GeneratePDF function called");
       setIsGeneratingPdf(true);
       setPdfError(null);
       
       const data = form.getValues();
+      console.log("Form data retrieved:", !!data.personalInfo.fullName);
       
       // Validate required data
       if (!data.personalInfo.fullName || !data.personalInfo.email) {
         throw new Error("Please fill in all required personal information fields");
       }
       
+      console.log("Starting PDF generation...");
       toast.loading("Generating your professional resume...");
       
       // Get template configuration
       const template = templates[selectedTemplate];
+      console.log("Using template:", selectedTemplate);
       
       const pdf = new jsPDF({
         orientation: 'portrait',
@@ -580,6 +584,7 @@ export default function ResumeBuilder() {
       const filename = `SkillMap_Resume_${data.personalInfo.fullName.replace(/\s+/g, '_')}_${timestamp}.pdf`;
       
       // Create blob and open in new tab for preview and download
+      console.log("Creating PDF blob and opening in new tab...");
       const pdfOutput = pdf.output('blob');
       const blobUrl = URL.createObjectURL(pdfOutput);
       
@@ -587,6 +592,16 @@ export default function ResumeBuilder() {
       const newTab = window.open(blobUrl, '_blank');
       if (newTab) {
         newTab.document.title = filename;
+        console.log("PDF opened successfully in new tab");
+        toast.success("Resume opened in new tab! You can view and download it from there. 🎉");
+      } else {
+        // Fallback for blocked popups
+        console.log("Popup blocked, offering direct download");
+        const link = document.createElement('a');
+        link.href = blobUrl;
+        link.download = filename;
+        link.click();
+        toast.success("Resume downloaded successfully! 🎉");
       }
       
       // Clean up the blob URL after a delay to prevent memory leaks
@@ -594,8 +609,7 @@ export default function ResumeBuilder() {
         URL.revokeObjectURL(blobUrl);
       }, 100000); // 100 seconds should be enough for the user to view/download
       
-      toast.success("Resume opened in new tab! You can view and download it from there. 🎉");
-      console.log("PDF generated and opened in new tab successfully");
+      console.log("PDF generated and opened successfully");
     } catch (error) {
       console.error("Error generating PDF:", error);
       const errorMessage = error instanceof Error ? error.message : "Failed to generate PDF. Please try again.";
@@ -607,11 +621,17 @@ export default function ResumeBuilder() {
   };
 
   // Quick regeneration function
-  const quickRegenerate = () => {
+  const quickRegenerate = useCallback(() => {
+    console.log("Quick regenerate clicked");
     if (showPreview) {
-      generatePDF();
+      const data = form.getValues();
+      console.log("Refreshing preview with data:", !!data.personalInfo.fullName);
+      toast.success("Preview refreshed!");
+      // Force re-render by setting showPreview false then true
+      setShowPreview(false);
+      setTimeout(() => setShowPreview(true), 50);
     }
-  };
+  }, [showPreview, form]);
 
   const onSubmit = useCallback((data: ResumeData) => {
     console.log("Form submitted:", data);
