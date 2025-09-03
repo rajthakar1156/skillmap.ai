@@ -10,9 +10,11 @@ import { BackgroundGradient } from "@/components/ui/background-gradient";
 import { TextGenerateEffect } from "@/components/ui/text-generate-effect";
 import { GridBackground } from "@/components/ui/grid-background";
 import { motion } from "framer-motion";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const Index = () => {
   const navigate = useNavigate();
+  const { translate } = useLanguage();
 
   const features = [
     {

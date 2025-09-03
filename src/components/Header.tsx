@@ -10,7 +10,9 @@ import {
   User, 
   BarChart3,
   Shield,
-  ChevronDown
+  ChevronDown,
+  Languages,
+  Target
 } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
@@ -19,9 +21,11 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useLanguage, type Language } from "@/contexts/LanguageContext";
 
 const Header = () => {
   const { theme, setTheme } = useTheme();
+  const { language, setLanguage, translate } = useLanguage();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
@@ -29,10 +33,18 @@ const Header = () => {
   const isActive = (path: string) => location.pathname === path;
 
   const navItems = [
-    { label: "Home", path: "/", icon: Compass },
-    { label: "Assessment", path: "/profile", icon: User },
-    { label: "Results", path: "/results", icon: BarChart3 },
-    { label: "Resume Builder", path: "/resume-builder", icon: Shield }
+    { label: "nav.home", path: "/", icon: Compass },
+    { label: "nav.assessment", path: "/profile", icon: User },
+    { label: "nav.results", path: "/results", icon: BarChart3 },
+    { label: "nav.opportunities", path: "/opportunities", icon: Target },
+    { label: "nav.resume", path: "/resume-builder", icon: Shield }
+  ];
+
+  const languages = [
+    { code: 'en' as Language, name: 'English', nativeName: 'English' },
+    { code: 'hi' as Language, name: 'Hindi', nativeName: 'हिन्दी' },
+    { code: 'gu' as Language, name: 'Gujarati', nativeName: 'ગુજરાતી' },
+    { code: 'ta' as Language, name: 'Tamil', nativeName: 'தமிழ்' }
   ];
 
   return (
@@ -63,7 +75,7 @@ const Header = () => {
                 className="relative"
               >
                 <item.icon className="w-4 h-4 mr-2" />
-                {item.label}
+                {translate(item.label, item.label)}
                 {isActive(item.path) && (
                   <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-primary rounded-full" />
                 )}
@@ -73,6 +85,30 @@ const Header = () => {
 
           {/* Right side controls */}
           <div className="flex items-center space-x-2">
+            {/* Language Switcher */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon">
+                  <Languages className="h-4 w-4" />
+                  <span className="sr-only">Switch language</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                {languages.map((lang) => (
+                  <DropdownMenuItem 
+                    key={lang.code} 
+                    onClick={() => setLanguage(lang.code)}
+                    className={language === lang.code ? 'bg-accent' : ''}
+                  >
+                    <span className="flex items-center justify-between w-full">
+                      <span>{lang.nativeName}</span>
+                      {language === lang.code && <span className="ml-2">✓</span>}
+                    </span>
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+
             {/* Theme Toggle */}
             <Button
               variant="ghost"
@@ -92,7 +128,7 @@ const Header = () => {
               onClick={() => navigate('/profile')}
               className="hidden sm:inline-flex"
             >
-              Start Assessment
+              {translate('nav.start', 'Start Assessment')}
             </Button>
 
             {/* Mobile Menu Button */}
@@ -126,7 +162,7 @@ const Header = () => {
                   }}
                 >
                   <item.icon className="w-4 h-4 mr-2" />
-                  {item.label}
+                  {translate(item.label, item.label)}
                 </Button>
               ))}
               <div className="pt-2 border-t border-border/40">
@@ -138,7 +174,7 @@ const Header = () => {
                     setIsMobileMenuOpen(false);
                   }}
                 >
-                  Start Assessment
+                  {translate('nav.start', 'Start Assessment')}
                 </Button>
               </div>
             </nav>
