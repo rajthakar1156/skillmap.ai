@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,10 +11,39 @@ import { TextGenerateEffect } from "@/components/ui/text-generate-effect";
 import { GridBackground } from "@/components/ui/grid-background";
 import { motion } from "framer-motion";
 import { useLanguage } from "../contexts/LanguageContext";
+import VoiceInterface from "@/components/VoiceInterface";
 
 const Index = () => {
   const navigate = useNavigate();
   const { translate } = useLanguage();
+  const [showVoiceInterface, setShowVoiceInterface] = useState(false);
+
+  // Mock career recommendation function
+  const handleVoiceQuery = async (query: string): Promise<string> => {
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    
+    // Simple keyword-based response (in a real app, this would call your AI API)
+    const queryLower = query.toLowerCase();
+    
+    if (queryLower.includes('ai') || queryLower.includes('artificial intelligence')) {
+      return translate('ai.recommendation', 
+        'Based on your interest in AI, I recommend exploring careers as a Machine Learning Engineer, Data Scientist, or AI Research Scientist. These fields offer excellent growth prospects with average salaries ranging from ₹8-25 lakhs per year in India.'
+      );
+    } else if (queryLower.includes('math') || queryLower.includes('mathematics')) {
+      return translate('math.recommendation',
+        'With strong mathematics skills, you could excel as a Data Analyst, Quantitative Analyst, or Operations Research Analyst. The finance and tech sectors highly value mathematical expertise.'
+      );
+    } else if (queryLower.includes('programming') || queryLower.includes('coding')) {
+      return translate('programming.recommendation',
+        'Programming skills open doors to Software Engineering, Web Development, and Mobile App Development. With India\'s booming tech industry, these careers offer great opportunities.'
+      );
+    } else {
+      return translate('general.recommendation',
+        'I\'d be happy to help you explore career options! Could you tell me more about your interests, subjects you enjoy, or skills you have? This will help me provide more personalized recommendations.'
+      );
+    }
+  };
 
   const features = [
     {
@@ -89,9 +118,9 @@ const Index = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.2 }}
             >
-              <span className="text-foreground">Discover Your</span>{" "}
-              <span className="bg-gradient-primary bg-clip-text text-transparent">Perfect Career</span>{" "}
-              <span className="text-foreground">with AI</span>
+              <span className="text-foreground">{translate('hero.discover', 'Discover Your')}</span>{" "}
+              <span className="bg-gradient-primary bg-clip-text text-transparent">{translate('hero.perfect', 'Perfect Career')}</span>{" "}
+              <span className="text-foreground">{translate('hero.with_ai', 'with AI')}</span>
             </motion.h1>
             
             <motion.div
@@ -100,7 +129,7 @@ const Index = () => {
               transition={{ duration: 0.8, delay: 0.4 }}
             >
               <TextGenerateEffect 
-                words="Get personalized career recommendations powered by advanced AI. Designed specifically for Indian students to navigate the modern job market with confidence."
+                words={translate('hero.subtitle', 'Get personalized career recommendations powered by advanced AI. Designed specifically for Indian students to navigate the modern job market with confidence.')}
                 className="text-lg sm:text-xl lg:text-2xl text-muted-foreground mb-8 max-w-3xl mx-auto leading-relaxed"
               />
             </motion.div>
@@ -118,17 +147,17 @@ const Index = () => {
                 className="bg-primary hover:bg-primary/90 text-primary-foreground min-w-[200px] h-12 text-lg font-medium rounded-lg transition-all duration-300 hover:scale-105 hover:shadow-lg"
               >
                 <Compass className="w-5 h-5 mr-2" />
-                Start Free Analysis
+                {translate('hero.cta.analysis', 'Start Free Analysis')}
               </Button>
               
               <Button 
                 variant="outline" 
                 size="xl"
-                onClick={() => navigate('/results', { state: { careerPath: 'Data Scientist' } })}
+                onClick={() => setShowVoiceInterface(!showVoiceInterface)}
                 className="min-w-[200px] h-12 text-lg font-medium rounded-lg border-2 hover:bg-secondary transition-all duration-300"
               >
                 <BookOpen className="w-5 h-5 mr-2" />
-                Explore Resources
+                {translate('voice.startListening', 'Voice Assistant')}
               </Button>
             </motion.div>
             
@@ -140,17 +169,33 @@ const Index = () => {
             >
               <div className="flex items-center gap-2">
                 <CheckCircle className="w-4 h-4 text-accent" />
-                <span>50,000+ Students Guided</span>
+                <span>{translate('hero.stats.students', '50,000+ Students Guided')}</span>
               </div>
               <div className="flex items-center gap-2">
                 <CheckCircle className="w-4 h-4 text-accent" />
-                <span>500+ Career Paths</span>
+                <span>{translate('hero.stats.careers', '500+ Career Paths')}</span>
               </div>
               <div className="flex items-center gap-2">
                 <CheckCircle className="w-4 h-4 text-accent" />
-                <span>98% Accuracy Rate</span>
+                <span>{translate('hero.stats.accuracy', '98% Accuracy Rate')}</span>
               </div>
             </motion.div>
+            
+            {/* Voice Interface */}
+            {showVoiceInterface && (
+              <motion.div
+                initial={{ opacity: 0, y: 20, scale: 0.9 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -20, scale: 0.9 }}
+                transition={{ duration: 0.3 }}
+                className="mt-8 flex justify-center"
+              >
+                <VoiceInterface 
+                  onVoiceQuery={handleVoiceQuery}
+                  className="w-full max-w-lg"
+                />
+              </motion.div>
+            )}
           </motion.div>
         </div>
       </section>

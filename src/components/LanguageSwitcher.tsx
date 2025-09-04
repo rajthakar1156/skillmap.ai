@@ -16,7 +16,16 @@ const LanguageSwitcher = () => {
     { code: 'en' as Language, name: 'English', nativeName: 'English' },
     { code: 'hi' as Language, name: 'Hindi', nativeName: 'हिन्दी' },
     { code: 'gu' as Language, name: 'Gujarati', nativeName: 'ગુજરાતી' },
-    { code: 'ta' as Language, name: 'Tamil', nativeName: 'தமிழ்' }
+    { code: 'ta' as Language, name: 'Tamil', nativeName: 'தமிழ்' },
+    { code: 'bn' as Language, name: 'Bengali', nativeName: 'বাংলা' },
+    { code: 'te' as Language, name: 'Telugu', nativeName: 'తెలుగు' },
+    { code: 'mr' as Language, name: 'Marathi', nativeName: 'मराठी' },
+    { code: 'kn' as Language, name: 'Kannada', nativeName: 'ಕನ್ನಡ' },
+    { code: 'ml' as Language, name: 'Malayalam', nativeName: 'മലയാളം' },
+    { code: 'or' as Language, name: 'Odia', nativeName: 'ଓଡ଼ିଆ' },
+    { code: 'pa' as Language, name: 'Punjabi', nativeName: 'ਪੰਜਾਬੀ' },
+    { code: 'as' as Language, name: 'Assamese', nativeName: 'অসমীয়া' },
+    { code: 'ur' as Language, name: 'Urdu', nativeName: 'اردو' }
   ];
 
   return (
@@ -27,7 +36,7 @@ const LanguageSwitcher = () => {
           <span className="sr-only">Switch language</span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
+      <DropdownMenuContent align="end" className="max-h-80 overflow-y-auto">
         {languages.map((lang) => (
           <DropdownMenuItem 
             key={lang.code} 
