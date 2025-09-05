@@ -41,10 +41,19 @@ const Header = () => {
   ];
 
   const languages = [
-    { code: 'en' as Language, name: 'English', nativeName: 'English' },
-    { code: 'hi' as Language, name: 'Hindi', nativeName: 'हिन्दी' },
-    { code: 'gu' as Language, name: 'Gujarati', nativeName: 'ગુજરાતી' },
-    { code: 'ta' as Language, name: 'Tamil', nativeName: 'தமிழ்' }
+    { code: 'en' as Language, name: 'English', nativeName: 'English', flag: '🇺🇸' },
+    { code: 'hi' as Language, name: 'Hindi', nativeName: 'हिन्दी', flag: '🇮🇳' },
+    { code: 'gu' as Language, name: 'Gujarati', nativeName: 'ગુજરાતી', flag: '🇮🇳' },
+    { code: 'ta' as Language, name: 'Tamil', nativeName: 'தமிழ்', flag: '🇮🇳' },
+    { code: 'bn' as Language, name: 'Bengali', nativeName: 'বাংলা', flag: '🇮🇳' },
+    { code: 'te' as Language, name: 'Telugu', nativeName: 'తెలుగు', flag: '🇮🇳' },
+    { code: 'mr' as Language, name: 'Marathi', nativeName: 'मराठी', flag: '🇮🇳' },
+    { code: 'kn' as Language, name: 'Kannada', nativeName: 'ಕನ್ನಡ', flag: '🇮🇳' },
+    { code: 'ml' as Language, name: 'Malayalam', nativeName: 'മലയാളം', flag: '🇮🇳' },
+    { code: 'or' as Language, name: 'Odia', nativeName: 'ଓଡ଼ିଆ', flag: '🇮🇳' },
+    { code: 'pa' as Language, name: 'Punjabi', nativeName: 'ਪੰਜਾਬੀ', flag: '🇮🇳' },
+    { code: 'as' as Language, name: 'Assamese', nativeName: 'অসমীয়া', flag: '🇮🇳' },
+    { code: 'ur' as Language, name: 'Urdu', nativeName: 'اردو', flag: '🇵🇰' }
   ];
 
   return (
@@ -93,16 +102,20 @@ const Header = () => {
                   <span className="sr-only">Switch language</span>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
+              <DropdownMenuContent align="end" className="w-56 max-h-96 overflow-y-auto bg-background border shadow-lg">
                 {languages.map((lang) => (
                   <DropdownMenuItem 
                     key={lang.code} 
                     onClick={() => setLanguage(lang.code)}
-                    className={language === lang.code ? 'bg-accent' : ''}
+                    className={`cursor-pointer transition-colors hover:bg-accent/20 ${language === lang.code ? 'bg-accent/30' : ''}`}
                   >
                     <span className="flex items-center justify-between w-full">
-                      <span>{lang.nativeName}</span>
-                      {language === lang.code && <span className="ml-2">✓</span>}
+                      <span className="flex items-center gap-2">
+                        <span className="text-lg">{lang.flag}</span>
+                        <span className="font-medium">{lang.nativeName}</span>
+                        <span className="text-xs text-muted-foreground">({lang.name})</span>
+                      </span>
+                      {language === lang.code && <span className="ml-2 text-primary">✓</span>}
                     </span>
                   </DropdownMenuItem>
                 ))}

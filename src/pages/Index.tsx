@@ -18,25 +18,33 @@ const Index = () => {
   const { translate } = useLanguage();
   const [showVoiceInterface, setShowVoiceInterface] = useState(false);
 
-  // Mock career recommendation function
+  // Enhanced AI career recommendation function
   const handleVoiceQuery = async (query: string): Promise<string> => {
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    // Simulate API delay for realistic UX
+    await new Promise(resolve => setTimeout(resolve, 1500));
     
-    // Simple keyword-based response (in a real app, this would call your AI API)
+    // Enhanced keyword-based response with multi-language support
     const queryLower = query.toLowerCase();
     
-    if (queryLower.includes('ai') || queryLower.includes('artificial intelligence')) {
+    if (queryLower.includes('ai') || queryLower.includes('artificial intelligence') || queryLower.includes('machine learning')) {
       return translate('ai.recommendation', 
         'Based on your interest in AI, I recommend exploring careers as a Machine Learning Engineer, Data Scientist, or AI Research Scientist. These fields offer excellent growth prospects with average salaries ranging from ₹8-25 lakhs per year in India.'
       );
-    } else if (queryLower.includes('math') || queryLower.includes('mathematics')) {
+    } else if (queryLower.includes('math') || queryLower.includes('mathematics') || queryLower.includes('statistics')) {
       return translate('math.recommendation',
         'With strong mathematics skills, you could excel as a Data Analyst, Quantitative Analyst, or Operations Research Analyst. The finance and tech sectors highly value mathematical expertise.'
       );
-    } else if (queryLower.includes('programming') || queryLower.includes('coding')) {
+    } else if (queryLower.includes('programming') || queryLower.includes('coding') || queryLower.includes('software')) {
       return translate('programming.recommendation',
         'Programming skills open doors to Software Engineering, Web Development, and Mobile App Development. With India\'s booming tech industry, these careers offer great opportunities.'
+      );
+    } else if (queryLower.includes('business') || queryLower.includes('management') || queryLower.includes('commerce')) {
+      return translate('business.recommendation',
+        'Business and management skills can lead to careers in Product Management, Business Analysis, or Consulting. These roles are in high demand across industries with salaries ranging from ₹6-20 lakhs per year.'
+      );
+    } else if (queryLower.includes('creative') || queryLower.includes('design') || queryLower.includes('art')) {
+      return translate('creative.recommendation',
+        'Creative skills can be channeled into UI/UX Design, Graphic Design, or Digital Marketing. The creative industry in India is growing rapidly with new opportunities emerging.'
       );
     } else {
       return translate('general.recommendation',
@@ -114,12 +122,25 @@ const Index = () => {
           >
             <motion.h1 
               className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold mb-6 leading-tight"
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.2 }}
+              transition={{ 
+                duration: 0.8, 
+                delay: 0.2,
+                type: "spring",
+                damping: 20,
+                stiffness: 100
+              }}
             >
               <span className="text-foreground">{translate('hero.discover', 'Discover Your')}</span>{" "}
-              <span className="bg-gradient-primary bg-clip-text text-transparent">{translate('hero.perfect', 'Perfect Career')}</span>{" "}
+              <motion.span 
+                className="bg-gradient-primary bg-clip-text text-transparent"
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.6, delay: 0.4 }}
+              >
+                {translate('hero.perfect', 'Perfect Career')}
+              </motion.span>{" "}
               <span className="text-foreground">{translate('hero.with_ai', 'with AI')}</span>
             </motion.h1>
             

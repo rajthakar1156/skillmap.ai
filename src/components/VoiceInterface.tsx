@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Mic, MicOff, Volume2, VolumeX, Loader2 } from 'lucide-react';
+import { Mic, MicOff, Volume2, VolumeX, Loader2, Square, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -17,6 +17,8 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({ onVoiceQuery, className
   const { language, translate } = useLanguage();
   const [isProcessing, setIsProcessing] = useState(false);
   const [response, setResponse] = useState<string>('');
+  const [showFallback, setShowFallback] = useState(false);
+  const [fallbackText, setFallbackText] = useState('');
 
   // Voice recognition configuration based on selected language
   const getVoiceLang = (lang: string) => {
@@ -42,20 +44,30 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({ onVoiceQuery, className
     if (!transcript.trim()) return;
     
     setIsProcessing(true);
+    setShowFallback(false);
     try {
       const result = await onVoiceQuery(transcript);
       setResponse(result);
       
-      // Speak the response
+      // Speak the response in selected language
       if (result) {
         speak(result, { lang: getVoiceLang(language) });
       }
     } catch (error) {
       console.error('Voice query error:', error);
-      setResponse('Sorry, I couldn\'t process your request. Please try again.');
+      const errorMsg = translate('voice.error.process', 'Sorry, I couldn\'t process your request. Please try again.');
+      setResponse(errorMsg);
+      setShowFallback(true);
     } finally {
       setIsProcessing(false);
     }
+  };
+
+  const handleFallbackSubmit = async () => {
+    if (!fallbackText.trim()) return;
+    await handleTranscript(fallbackText);
+    setFallbackText('');
+    setShowFallback(false);
   };
 
   const {
@@ -100,9 +112,18 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({ onVoiceQuery, className
 
   if (!voiceSupported) {
     return (
-      <Alert className={className}>
+      <Alert className={className} variant="destructive">
+        <AlertCircle className="h-4 w-4" />
         <AlertDescription>
           {translate('voice.error', 'Voice recognition not available in your browser')}
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="mt-2"
+            onClick={() => setShowFallback(true)}
+          >
+            {translate('voice.fallback', 'Use Text Instead')}
+          </Button>
         </AlertDescription>
       </Alert>
     );
@@ -128,11 +149,20 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({ onVoiceQuery, className
             disabled={isProcessing}
             variant={isListening ? "destructive" : "default"}
             size="lg"
-            className="flex-1"
+            className={`flex-1 transition-all duration-300 ${
+              isListening 
+                ? "bg-destructive hover:bg-destructive/90 shadow-glow animate-pulse" 
+                : "bg-primary hover:bg-primary/90"
+            }`}
           >
             {isListening ? (
               <>
-                <MicOff className="w-4 h-4 mr-2" />
+                <motion.div
+                  animate={{ scale: [1, 1.2, 1] }}
+                  transition={{ repeat: Infinity, duration: 1 }}
+                >
+                  <Square className="w-4 h-4 mr-2" />
+                </motion.div>
                 {translate('voice.stopListening', 'Stop Listening')}
               </>
             ) : (
@@ -148,8 +178,20 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({ onVoiceQuery, className
               onClick={handleStopSpeaking}
               variant="outline"
               size="lg"
+              className="hover:bg-destructive/10"
             >
               <VolumeX className="w-4 h-4" />
+            </Button>
+          )}
+
+          {(voiceError || ttsError) && !isListening && (
+            <Button
+              onClick={() => setShowFallback(true)}
+              variant="outline"
+              size="lg"
+              className="bg-secondary/50"
+            >
+              <AlertCircle className="w-4 h-4" />
             </Button>
           )}
         </div>
@@ -174,10 +216,36 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({ onVoiceQuery, className
                   {translate('voice.listening', 'Listening...')}
                 </span>
               </div>
+              
+              {/* Waveform Animation */}
+              <div className="flex items-center justify-center gap-1 mt-3">
+                {[...Array(5)].map((_, i) => (
+                  <motion.div
+                    key={i}
+                    className="w-1 bg-primary rounded-full"
+                    animate={{
+                      height: [8, 16, 8, 20, 8],
+                    }}
+                    transition={{
+                      repeat: Infinity,
+                      duration: 1.2,
+                      delay: i * 0.1,
+                    }}
+                  />
+                ))}
+              </div>
+              
+              {/* Real-time Transcript */}
               {transcript && (
-                <p className="text-sm text-muted-foreground mt-2">
-                  "{transcript}"
-                </p>
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="mt-3 p-2 bg-secondary/30 rounded border"
+                >
+                  <p className="text-sm text-foreground font-medium">
+                    "{transcript}"
+                  </p>
+                </motion.div>
               )}
             </motion.div>
           )}
@@ -242,11 +310,50 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({ onVoiceQuery, className
           </motion.div>
         )}
 
+        {/* Fallback Text Input */}
+        {showFallback && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="p-4 bg-secondary/20 rounded-lg border"
+          >
+            <h4 className="text-sm font-medium mb-2">
+              {translate('voice.fallback.title', 'Type your question instead:')}
+            </h4>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={fallbackText}
+                onChange={(e) => setFallbackText(e.target.value)}
+                placeholder={translate('voice.placeholder', 'Ask me about your career path...')}
+                className="flex-1 px-3 py-2 text-sm border rounded-md bg-background"
+                onKeyPress={(e) => e.key === 'Enter' && handleFallbackSubmit()}
+              />
+              <Button
+                onClick={handleFallbackSubmit}
+                disabled={!fallbackText.trim() || isProcessing}
+                size="sm"
+              >
+                {translate('common.submit', 'Submit')}
+              </Button>
+            </div>
+          </motion.div>
+        )}
+
         {/* Error Display */}
-        {(voiceError || ttsError) && (
+        {(voiceError || ttsError) && !showFallback && (
           <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
             <AlertDescription className="text-sm">
               {voiceError || ttsError}
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="mt-2 ml-2"
+                onClick={() => setShowFallback(true)}
+              >
+                {translate('voice.fallback', 'Use Text Instead')}
+              </Button>
             </AlertDescription>
           </Alert>
         )}

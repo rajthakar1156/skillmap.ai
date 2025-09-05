@@ -47,8 +47,17 @@ const translations: Record<Language, Record<string, string>> = {
     'voice.processing': 'Processing your query...',
     'voice.placeholder': 'Ask me about your career path, like "Suggest careers for AI and math"',
     'voice.error': 'Voice recognition not available in your browser',
+    'voice.error.process': 'Sorry, I couldn\'t process your request. Please try again.',
     'voice.noSpeech': 'No speech detected. Please try again.',
     'voice.speaking': 'Speaking recommendations...',
+    'voice.fallback': 'Use Text Instead',
+    'voice.fallback.title': 'Type your question instead:',
+    
+    // AI Recommendations
+    'ai.recommendation': 'Based on your interest in AI, I recommend exploring careers as a Machine Learning Engineer, Data Scientist, or AI Research Scientist. These fields offer excellent growth prospects with average salaries ranging from ₹8-25 lakhs per year in India.',
+    'math.recommendation': 'With strong mathematics skills, you could excel as a Data Analyst, Quantitative Analyst, or Operations Research Analyst. The finance and tech sectors highly value mathematical expertise.',
+    'programming.recommendation': 'Programming skills open doors to Software Engineering, Web Development, and Mobile App Development. With India\'s booming tech industry, these careers offer great opportunities.',
+    'general.recommendation': 'I\'d be happy to help you explore career options! Could you tell me more about your interests, subjects you enjoy, or skills you have? This will help me provide more personalized recommendations.',
     
     // Opportunities
     'opportunities.title': 'Opportunities for You',
@@ -74,7 +83,18 @@ const translations: Record<Language, Record<string, string>> = {
     'common.submit': 'Submit',
     'common.next': 'Next',
     'common.previous': 'Previous',
-    'common.finish': 'Finish'
+    'common.finish': 'Finish',
+    
+    // Additional Recommendations
+    'business.recommendation': 'Business and management skills can lead to careers in Product Management, Business Analysis, or Consulting. These roles are in high demand across industries with salaries ranging from ₹6-20 lakhs per year.',
+    'creative.recommendation': 'Creative skills can be channeled into UI/UX Design, Graphic Design, or Digital Marketing. The creative industry in India is growing rapidly with new opportunities emerging.',
+    
+    // Voice Opportunities
+    'voice.askAboutOpportunities': 'Ask About Opportunities',
+    'opportunities.voice.scholarship': 'I found several scholarships for you! The top ones include KVPY Fellowship and JN Tata Endowment. These offer financial support for your education and research pursuits.',
+    'opportunities.voice.internship': 'There are great internship opportunities available! Google Summer of Code is highly recommended for programming students, offering mentorship and stipend.',
+    'opportunities.voice.hackathon': 'I found exciting hackathons! Smart India Hackathon and Microsoft Imagine Cup are great for showcasing your innovation skills with substantial prize money.',
+    'opportunities.voice.general': 'Based on your profile, I\'ve found several recommended opportunities across scholarships, internships, and hackathons. Would you like me to tell you about a specific type?',
   },
   hi: {
     // Navigation
@@ -111,8 +131,19 @@ const translations: Record<Language, Record<string, string>> = {
     'voice.processing': 'आपकी क्वेरी प्रोसेस कर रहे हैं...',
     'voice.placeholder': 'मुझसे अपने करियर पथ के बारे में पूछें, जैसे "AI और गणित के लिए करियर सुझाएं"',
     'voice.error': 'आपके ब्राउज़र में वॉयस रिकग्निशन उपलब्ध नहीं है',
+    'voice.error.process': 'खुशी की बात है, मैं आपके अनुरोध को प्रोसेस नहीं कर सका। कृपया पुनः प्रयास करें।',
     'voice.noSpeech': 'कोई भाषण का पता नहीं चला। कृपया पुनः प्रयास करें।',
     'voice.speaking': 'सिफारिशें बोल रहे हैं...',
+    'voice.fallback': 'बजाय टेक्स्ट का उपयोग करें',
+    'voice.fallback.title': 'बजाय अपना प्रश्न टाइप करें:',
+    
+    // AI Recommendations
+    'ai.recommendation': 'AI में आपकी रुचि के आधार पर, मैं मशीन लर्निंग इंजीनियर, डेटा साइंटिस्ट, या AI रिसर्च साइंटिस्ट के रूप में करियर खोजने की सलाह देता हूं। ये क्षेत्र भारत में ₹8-25 लाख प्रति वर्ष की औसत वेतन के साथ उत्कृष्ट विकास संभावनाएं प्रदान करते हैं।',
+    'math.recommendation': 'मजबूत गणित कौशल के साथ, आप डेटा एनालिस्ट, क्वांटिटेटिव एनालिस्ट, या ऑपरेशन्स रिसर्च एनालिस्ट के रूप में उत्कृष्ट हो सकते हैं। वित्त और तकनीकी क्षेत्र गणितीय विशेषज्ञता को बहुत महत्व देते हैं।',
+    'programming.recommendation': 'प्रोग्रामिंग कौशल सॉफ्टवेयर इंजीनियरिंग, वेब डेवलपमेंट, और मोबाइल ऐप डेवलपमेंट के दरवाजे खोलते हैं। भारत के बूमिंग टेक इंडस्ट्री के साथ, ये करियर बहुत बेहतरीन अवसर प्रदान करते हैं।',
+    'business.recommendation': 'व्यवसाय और प्रबंधन कौशल उत्पाद प्रबंधन, व्यवसाय विश्लेषण, या परामर्श में करियर की ओर ले जा सकते हैं। ये भूमिकाएं उद्योगों में उच्च मांग में हैं।',
+    'creative.recommendation': 'रचनात्मक कौशल को UI/UX डिज़ाइन, ग्राफिक डिज़ाइन, या डिजिटल मार्केटिंग में चैनल किया जा सकता है। भारत में रचनात्मक उद्योग तेजी से ब रहा है।',
+    'general.recommendation': 'मैं आपको करियर विकल्प खोजने में मदद करने के लिए खुश हूं! क्या आप मुझे अपनी रुचियों, पसंदीदा विषयों, या कौशल के बारे में और बता सकते हैं?',
     
     // Opportunities
     'opportunities.title': 'आपके लिए अवसर',

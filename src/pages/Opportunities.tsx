@@ -4,10 +4,11 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Calendar, MapPin, ExternalLink, Star, Filter, SortAsc } from 'lucide-react';
+import { Calendar, MapPin, ExternalLink, Star, Filter, SortAsc, Mic } from 'lucide-react';
 import Header from '@/components/Header';
+import VoiceInterface from '@/components/VoiceInterface';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface Opportunity {
   id: string;
@@ -133,6 +134,36 @@ const Opportunities = () => {
   const [filterType, setFilterType] = useState<string>('all');
   const [sortBy, setSortBy] = useState<string>('relevance');
   const [activeTab, setActiveTab] = useState<string>('all');
+  const [showVoiceInterface, setShowVoiceInterface] = useState(false);
+
+  // Voice query handler for opportunities
+  const handleVoiceQuery = async (query: string): Promise<string> => {
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    
+    const queryLower = query.toLowerCase();
+    
+    if (queryLower.includes('scholarship') || queryLower.includes('financial aid')) {
+      const scholarships = opportunities.filter(opp => opp.type === 'scholarship');
+      return translate('opportunities.voice.scholarship', 
+        `I found ${scholarships.length} scholarships for you! The top ones include KVPY Fellowship and JN Tata Endowment. These offer financial support for your education and research pursuits.`
+      );
+    } else if (queryLower.includes('internship') || queryLower.includes('work experience')) {
+      const internships = opportunities.filter(opp => opp.type === 'internship');
+      return translate('opportunities.voice.internship',
+        `There are ${internships.length} internship opportunities available! Google Summer of Code is highly recommended for programming students, offering mentorship and stipend.`
+      );
+    } else if (queryLower.includes('hackathon') || queryLower.includes('competition')) {
+      const hackathons = opportunities.filter(opp => opp.type === 'hackathon');
+      return translate('opportunities.voice.hackathon',
+        `I found ${hackathons.length} exciting hackathons! Smart India Hackathon and Microsoft Imagine Cup are great for showcasing your innovation skills with substantial prize money.`
+      );
+    } else {
+      const recommended = opportunities.filter(opp => opp.isRecommended);
+      return translate('opportunities.voice.general',
+        `Based on your profile, I've found ${recommended.length} recommended opportunities across scholarships, internships, and hackathons. Would you like me to tell you about a specific type?`
+      );
+    }
+  };
 
   // Filter and sort opportunities
   useEffect(() => {
@@ -198,9 +229,38 @@ const Opportunities = () => {
           <h1 className="text-4xl font-bold mb-4">
             {translate('opportunities.title', 'Opportunities for You')}
           </h1>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-6">
             {translate('opportunities.subtitle', 'Discover scholarships, internships, and hackathons tailored to your profile')}
           </p>
+          
+          {/* Voice Assistant Button */}
+          <Button
+            variant="outline"
+            size="lg"
+            onClick={() => setShowVoiceInterface(!showVoiceInterface)}
+            className="mb-4 bg-primary/5 hover:bg-primary/10 border-primary/20"
+          >
+            <Mic className="w-4 h-4 mr-2" />
+            {translate('voice.askAboutOpportunities', 'Ask About Opportunities')}
+          </Button>
+          
+          {/* Voice Interface */}
+          <AnimatePresence>
+            {showVoiceInterface && (
+              <motion.div
+                initial={{ opacity: 0, y: 20, scale: 0.9 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -20, scale: 0.9 }}
+                transition={{ duration: 0.3 }}
+                className="flex justify-center mb-8"
+              >
+                <VoiceInterface 
+                  onVoiceQuery={handleVoiceQuery}
+                  className="w-full max-w-lg"
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
         </motion.div>
 
         {/* Recommended Section */}
