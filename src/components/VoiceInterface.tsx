@@ -1,12 +1,21 @@
-import React, { useState } from 'react';
-import { Mic, MicOff, Volume2, VolumeX, Loader2, Square, AlertCircle } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Mic, MicOff, Volume2, VolumeX, Loader2, Square, AlertCircle, ArrowRight, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
 import { useVoiceRecognition } from '@/hooks/useVoiceRecognition';
 import { useTextToSpeech } from '@/hooks/useTextToSpeech';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { motion, AnimatePresence } from 'framer-motion';
+
+interface CareerRecommendation {
+  career: string;
+  skillRoadmap: string[];
+  missingSkills: string[];
+  resources: { title: string; url: string }[];
+  description: string;
+}
 
 interface VoiceInterfaceProps {
   onVoiceQuery: (query: string) => Promise<string>;
@@ -17,8 +26,10 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({ onVoiceQuery, className
   const { language, translate } = useLanguage();
   const [isProcessing, setIsProcessing] = useState(false);
   const [response, setResponse] = useState<string>('');
+  const [careerRecommendation, setCareerRecommendation] = useState<CareerRecommendation | null>(null);
   const [showFallback, setShowFallback] = useState(false);
   const [fallbackText, setFallbackText] = useState('');
+  const [lastTranscript, setLastTranscript] = useState('');
 
   // Voice recognition configuration based on selected language
   const getVoiceLang = (lang: string) => {
@@ -40,17 +51,63 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({ onVoiceQuery, className
     return langMap[lang] || 'en-IN';
   };
 
+  // Enhanced AI response parsing for career recommendations
+  const parseCareerRecommendation = (responseText: string): CareerRecommendation | null => {
+    try {
+      // Try to extract structured data from the response
+      const careerMatch = responseText.match(/(?:Career|Profession|Job):\s*([^\n]+)/i);
+      const skillsMatch = responseText.match(/(?:Skills|Roadmap|Path):\s*([^\n]+)/i);
+      const missingMatch = responseText.match(/(?:Missing|Learn|Need):\s*([^\n]+)/i);
+      
+      if (careerMatch) {
+        const career = careerMatch[1].trim();
+        const skills = skillsMatch ? 
+          skillsMatch[1].split(/[,→>-]/).map(s => s.trim()).filter(Boolean) :
+          ['Python', 'Data Analysis', 'Machine Learning', 'Statistics'];
+        
+        const missing = missingMatch ?
+          missingMatch[1].split(/[,→>-]/).map(s => s.trim()).filter(Boolean) :
+          ['Advanced ML', 'Deep Learning'];
+
+        return {
+          career,
+          skillRoadmap: skills,
+          missingSkills: missing,
+          resources: [
+            { title: 'Coursera Data Science', url: 'https://coursera.org/specializations/jhu-data-science' },
+            { title: 'Python for Data Science', url: 'https://youtube.com/watch?v=LHBE6Q9XlzI' },
+            { title: 'Kaggle Learn', url: 'https://kaggle.com/learn' }
+          ],
+          description: responseText
+        };
+      }
+    } catch (error) {
+      console.error('Error parsing career recommendation:', error);
+    }
+    return null;
+  };
+
   const handleTranscript = async (transcript: string) => {
     if (!transcript.trim()) return;
     
+    setLastTranscript(transcript);
     setIsProcessing(true);
     setShowFallback(false);
+    setCareerRecommendation(null);
+    
     try {
       const result = await onVoiceQuery(transcript);
       setResponse(result);
       
-      // Speak the response in selected language
-      if (result) {
+      // Parse for structured career recommendation
+      const parsedCareer = parseCareerRecommendation(result);
+      if (parsedCareer) {
+        setCareerRecommendation(parsedCareer);
+        // Speak the structured response
+        const speakText = `Recommended career: ${parsedCareer.career}. Key skills needed: ${parsedCareer.skillRoadmap.slice(0, 3).join(', ')}. You should focus on learning: ${parsedCareer.missingSkills.join(' and ')}.`;
+        speak(speakText, { lang: getVoiceLang(language) });
+      } else {
+        // Fallback to original response
         speak(result, { lang: getVoiceLang(language) });
       }
     } catch (error) {
@@ -107,34 +164,88 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({ onVoiceQuery, className
 
   const handleStopSpeaking = () => {
     stopSpeaking();
-    setResponse('');
   };
 
-  if (!voiceSupported) {
+  const handleReplay = () => {
+    if (careerRecommendation) {
+      const speakText = `Recommended career: ${careerRecommendation.career}. Key skills needed: ${careerRecommendation.skillRoadmap.slice(0, 3).join(', ')}. You should focus on learning: ${careerRecommendation.missingSkills.join(' and ')}.`;
+      speak(speakText);
+    } else if (response) {
+      speak(response);
+    }
+  };
+
+  // Cross-browser compatibility check
+  const isVoiceAvailable = () => {
+    const userAgent = navigator.userAgent;
+    const isChrome = /Chrome/.test(userAgent) && !/Edge/.test(userAgent);
+    const isEdge = /Edge/.test(userAgent);
+    const isAndroid = /Android/.test(userAgent);
+    const isSafari = /Safari/.test(userAgent) && !/Chrome/.test(userAgent);
+    
+    return voiceSupported && (isChrome || isEdge || isAndroid || !isSafari);
+  };
+
+  if (!isVoiceAvailable()) {
     return (
-      <Alert className={className} variant="destructive">
-        <AlertCircle className="h-4 w-4" />
-        <AlertDescription>
-          {translate('voice.error', 'Voice recognition not available in your browser')}
+      <Card className={`w-full max-w-md ${className}`}>
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <AlertCircle className="w-5 h-5 text-destructive" />
+            Voice Not Available
+          </CardTitle>
+          <CardDescription>
+            Voice recognition is not supported in your browser. Please use Chrome, Edge, or Android browser for voice features.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
           <Button 
             variant="outline" 
-            size="sm" 
-            className="mt-2"
             onClick={() => setShowFallback(true)}
+            className="w-full"
           >
             {translate('voice.fallback', 'Use Text Instead')}
           </Button>
-        </AlertDescription>
-      </Alert>
+          
+          {showFallback && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mt-4 p-4 bg-secondary/20 rounded-lg border"
+            >
+              <h4 className="text-sm font-medium mb-2">
+                {translate('voice.fallback.title', 'Type your career question:')}
+              </h4>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={fallbackText}
+                  onChange={(e) => setFallbackText(e.target.value)}
+                  placeholder="e.g., Suggest careers for AI and math"
+                  className="flex-1 px-3 py-2 text-sm border rounded-md bg-background"
+                  onKeyPress={(e) => e.key === 'Enter' && handleFallbackSubmit()}
+                />
+                <Button
+                  onClick={handleFallbackSubmit}
+                  disabled={!fallbackText.trim() || isProcessing}
+                  size="sm"
+                >
+                  {translate('common.submit', 'Submit')}
+                </Button>
+              </div>
+            </motion.div>
+          )}
+        </CardContent>
+      </Card>
     );
   }
 
   return (
-    <Card className={`w-full max-w-md ${className}`}>
+    <Card className={`w-full max-w-2xl ${className}`}>
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-lg">
           <Mic className="w-5 h-5 text-primary" />
-          Voice Assistant
+          Voice Career Assistant
         </CardTitle>
         <CardDescription>
           {translate('voice.placeholder', 'Ask me about your career path, like "Suggest careers for AI and math"')}
@@ -203,47 +314,54 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({ onVoiceQuery, className
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
-              className="text-center p-3 bg-primary/10 rounded-lg"
+              className="text-center p-4 bg-primary/10 rounded-lg border"
             >
-              <div className="flex items-center justify-center gap-2 text-primary">
+              <div className="flex items-center justify-center gap-2 text-primary mb-3">
                 <motion.div
                   animate={{ scale: [1, 1.2, 1] }}
                   transition={{ repeat: Infinity, duration: 1.5 }}
                 >
-                  <Mic className="w-4 h-4" />
+                  <Mic className="w-5 h-5" />
                 </motion.div>
-                <span className="text-sm font-medium">
-                  {translate('voice.listening', 'Listening...')}
+                <span className="text-base font-medium">
+                  🎙️ {translate('voice.listening', 'Listening...')}
                 </span>
               </div>
               
-              {/* Waveform Animation */}
-              <div className="flex items-center justify-center gap-1 mt-3">
-                {[...Array(5)].map((_, i) => (
+              {/* Enhanced Waveform Animation */}
+              <div className="flex items-center justify-center gap-1 mb-3">
+                {[...Array(7)].map((_, i) => (
                   <motion.div
                     key={i}
                     className="w-1 bg-primary rounded-full"
                     animate={{
-                      height: [8, 16, 8, 20, 8],
+                      height: [8, 20, 8, 24, 8, 16, 8],
                     }}
                     transition={{
                       repeat: Infinity,
-                      duration: 1.2,
+                      duration: 1.5,
                       delay: i * 0.1,
                     }}
                   />
                 ))}
               </div>
               
-              {/* Real-time Transcript */}
+              {/* Real-time Transcript with typing animation */}
               {transcript && (
                 <motion.div
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="mt-3 p-2 bg-secondary/30 rounded border"
+                  className="p-3 bg-background/80 rounded border shadow-sm"
                 >
-                  <p className="text-sm text-foreground font-medium">
-                    "{transcript}"
+                  <p className="text-sm text-foreground font-medium leading-relaxed">
+                    <span className="text-primary">💬</span> "{transcript}"
+                    <motion.span
+                      animate={{ opacity: [1, 0, 1] }}
+                      transition={{ repeat: Infinity, duration: 1 }}
+                      className="ml-1 text-primary"
+                    >
+                      |
+                    </motion.span>
                   </p>
                 </motion.div>
               )}
@@ -255,14 +373,19 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({ onVoiceQuery, className
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
-              className="text-center p-3 bg-secondary/50 rounded-lg"
+              className="text-center p-4 bg-secondary/50 rounded-lg border"
             >
               <div className="flex items-center justify-center gap-2">
-                <Loader2 className="w-4 h-4 animate-spin" />
-                <span className="text-sm">
-                  {translate('voice.processing', 'Processing your query...')}
+                <Loader2 className="w-5 h-5 animate-spin" />
+                <span className="text-base font-medium">
+                  🧠 {translate('voice.processing', 'Analyzing your career query...')}
                 </span>
               </div>
+              {lastTranscript && (
+                <p className="text-sm text-muted-foreground mt-2">
+                  Query: "{lastTranscript}"
+                </p>
+              )}
             </motion.div>
           )}
 
@@ -271,40 +394,126 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({ onVoiceQuery, className
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
-              className="text-center p-3 bg-accent/20 rounded-lg"
+              className="text-center p-4 bg-accent/20 rounded-lg border"
             >
               <div className="flex items-center justify-center gap-2 text-accent-foreground">
                 <motion.div
                   animate={{ scale: [1, 1.1, 1] }}
                   transition={{ repeat: Infinity, duration: 0.8 }}
                 >
-                  <Volume2 className="w-4 h-4" />
+                  <Volume2 className="w-5 h-5" />
                 </motion.div>
-                <span className="text-sm font-medium">
-                  {translate('voice.speaking', 'Speaking recommendations...')}
+                <span className="text-base font-medium">
+                  🔊 {translate('voice.speaking', 'Speaking recommendations...')}
                 </span>
               </div>
             </motion.div>
           )}
         </AnimatePresence>
 
-        {/* Response Display */}
-        {response && !isSpeaking && (
+        {/* Structured Career Recommendation Display */}
+        {careerRecommendation && !isSpeaking && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="space-y-4"
+          >
+            <Card className="border-primary/20 bg-primary/5">
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  🎯 Career: {careerRecommendation.career}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {/* Skill Roadmap */}
+                <div>
+                  <h4 className="font-semibold mb-2 flex items-center gap-2">
+                    🛤️ Skill Roadmap:
+                  </h4>
+                  <div className="flex flex-wrap items-center gap-2">
+                    {careerRecommendation.skillRoadmap.map((skill, index) => (
+                      <React.Fragment key={skill}>
+                        <Badge variant="secondary" className="px-3 py-1">
+                          {skill}
+                        </Badge>
+                        {index < careerRecommendation.skillRoadmap.length - 1 && (
+                          <ArrowRight className="w-4 h-4 text-muted-foreground" />
+                        )}
+                      </React.Fragment>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Missing Skills */}
+                <div>
+                  <h4 className="font-semibold mb-2 flex items-center gap-2">
+                    📚 Skills to Learn:
+                  </h4>
+                  <div className="flex flex-wrap gap-2">
+                    {careerRecommendation.missingSkills.map((skill) => (
+                      <Badge key={skill} variant="destructive" className="px-3 py-1">
+                        {skill}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Resources */}
+                <div>
+                  <h4 className="font-semibold mb-2 flex items-center gap-2">
+                    🔗 Recommended Resources:
+                  </h4>
+                  <div className="grid gap-2">
+                    {careerRecommendation.resources.map((resource, index) => (
+                      <Button
+                        key={index}
+                        variant="outline"
+                        size="sm"
+                        className="justify-between h-auto p-3"
+                        asChild
+                      >
+                        <a href={resource.url} target="_blank" rel="noopener noreferrer">
+                          <span>{resource.title}</span>
+                          <ExternalLink className="w-4 h-4" />
+                        </a>
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Replay Button */}
+                {ttsSupported && (
+                  <Button
+                    variant="secondary"
+                    onClick={handleReplay}
+                    className="w-full mt-4"
+                  >
+                    <Volume2 className="w-4 h-4 mr-2" />
+                    🔊 Replay Recommendation
+                  </Button>
+                )}
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
+
+        {/* Fallback Response Display (for non-structured responses) */}
+        {response && !careerRecommendation && !isSpeaking && (
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="p-3 bg-card border rounded-lg"
+            className="p-4 bg-card border rounded-lg"
           >
             <p className="text-sm leading-relaxed">{response}</p>
             {ttsSupported && (
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => speak(response)}
-                className="mt-2 h-8 px-2 text-xs"
+                onClick={handleReplay}
+                className="mt-3 h-8 px-2 text-xs"
               >
                 <Volume2 className="w-3 h-3 mr-1" />
-                Repeat
+                🔊 Replay
               </Button>
             )}
           </motion.div>
@@ -318,24 +527,34 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({ onVoiceQuery, className
             className="p-4 bg-secondary/20 rounded-lg border"
           >
             <h4 className="text-sm font-medium mb-2">
-              {translate('voice.fallback.title', 'Type your question instead:')}
+              {translate('voice.fallback.title', 'Type your career question:')}
             </h4>
-            <div className="flex gap-2">
+            <div className="space-y-2">
               <input
                 type="text"
                 value={fallbackText}
                 onChange={(e) => setFallbackText(e.target.value)}
-                placeholder={translate('voice.placeholder', 'Ask me about your career path...')}
-                className="flex-1 px-3 py-2 text-sm border rounded-md bg-background"
+                placeholder="e.g., Suggest careers for AI and math"
+                className="w-full px-3 py-2 text-sm border rounded-md bg-background"
                 onKeyPress={(e) => e.key === 'Enter' && handleFallbackSubmit()}
               />
-              <Button
-                onClick={handleFallbackSubmit}
-                disabled={!fallbackText.trim() || isProcessing}
-                size="sm"
-              >
-                {translate('common.submit', 'Submit')}
-              </Button>
+              <div className="flex gap-2">
+                <Button
+                  onClick={handleFallbackSubmit}
+                  disabled={!fallbackText.trim() || isProcessing}
+                  size="sm"
+                  className="flex-1"
+                >
+                  {translate('common.submit', 'Get Career Advice')}
+                </Button>
+                <Button
+                  onClick={() => setShowFallback(false)}
+                  variant="outline"
+                  size="sm"
+                >
+                  Cancel
+                </Button>
+              </div>
             </div>
           </motion.div>
         )}
