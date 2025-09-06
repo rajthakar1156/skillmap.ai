@@ -35,7 +35,7 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({ onVoiceQuery, className
   const getVoiceLang = (lang: string) => {
     const langMap: Record<string, string> = {
       'en': 'en-IN',
-      'hi': 'hi-IN',
+      'hi': 'hi-IN', 
       'gu': 'gu-IN',
       'ta': 'ta-IN',
       'bn': 'bn-IN',
@@ -50,6 +50,17 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({ onVoiceQuery, className
     };
     return langMap[lang] || 'en-IN';
   };
+
+  // Update voice recognition when language changes
+  useEffect(() => {
+    if (isListening) {
+      stopListening();
+      // Small delay to ensure proper cleanup
+      setTimeout(() => {
+        startListening();
+      }, 300);
+    }
+  }, [language]);
 
   // Enhanced AI response parsing for career recommendations
   const parseCareerRecommendation = (responseText: string): CareerRecommendation | null => {
@@ -190,13 +201,13 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({ onVoiceQuery, className
     return (
       <Card className={`w-full max-w-md ${className}`}>
         <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2 text-lg">
-            <AlertCircle className="w-5 h-5 text-destructive" />
-            Voice Not Available
-          </CardTitle>
-          <CardDescription>
-            Voice recognition is not supported in your browser. Please use Chrome, Edge, or Android browser for voice features.
-          </CardDescription>
+        <CardTitle className="flex items-center gap-2 text-lg">
+          <AlertCircle className="w-5 h-5 text-destructive" />
+          {translate('voice.notAvailable', 'Voice Not Available')}
+        </CardTitle>
+        <CardDescription>
+          {translate('voice.notSupported', 'Voice recognition is not supported in your browser. Please use Chrome, Edge, or Android browser for voice features.')}
+        </CardDescription>
         </CardHeader>
         <CardContent>
           <Button 
@@ -245,7 +256,7 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({ onVoiceQuery, className
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-lg">
           <Mic className="w-5 h-5 text-primary" />
-          Voice Career Assistant
+          {translate('voice.title', 'Voice Career Assistant')}
         </CardTitle>
         <CardDescription>
           {translate('voice.placeholder', 'Ask me about your career path, like "Suggest careers for AI and math"')}
@@ -421,14 +432,14 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({ onVoiceQuery, className
             <Card className="border-primary/20 bg-primary/5">
               <CardHeader className="pb-3">
                 <CardTitle className="flex items-center gap-2 text-lg">
-                  🎯 Career: {careerRecommendation.career}
+                  🎯 {translate('voice.career', 'Career')}: {careerRecommendation.career}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 {/* Skill Roadmap */}
                 <div>
                   <h4 className="font-semibold mb-2 flex items-center gap-2">
-                    🛤️ Skill Roadmap:
+                    🛤️ {translate('voice.skillRoadmap', 'Skill Roadmap')}:
                   </h4>
                   <div className="flex flex-wrap items-center gap-2">
                     {careerRecommendation.skillRoadmap.map((skill, index) => (
@@ -447,7 +458,7 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({ onVoiceQuery, className
                 {/* Missing Skills */}
                 <div>
                   <h4 className="font-semibold mb-2 flex items-center gap-2">
-                    📚 Skills to Learn:
+                    📚 {translate('voice.skillsToLearn', 'Skills to Learn')}:
                   </h4>
                   <div className="flex flex-wrap gap-2">
                     {careerRecommendation.missingSkills.map((skill) => (
@@ -461,7 +472,7 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({ onVoiceQuery, className
                 {/* Resources */}
                 <div>
                   <h4 className="font-semibold mb-2 flex items-center gap-2">
-                    🔗 Recommended Resources:
+                    🔗 {translate('voice.resources', 'Recommended Resources')}:
                   </h4>
                   <div className="grid gap-2">
                     {careerRecommendation.resources.map((resource, index) => (
@@ -489,7 +500,7 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({ onVoiceQuery, className
                     className="w-full mt-4"
                   >
                     <Volume2 className="w-4 h-4 mr-2" />
-                    🔊 Replay Recommendation
+                    🔊 {translate('voice.replay', 'Replay Recommendation')}
                   </Button>
                 )}
               </CardContent>

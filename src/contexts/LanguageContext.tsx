@@ -41,6 +41,7 @@ const translations: Record<Language, Record<string, string>> = {
     'features.connections.desc': 'Connect your skills with top sectors and companies actively hiring in India.',
     
     // Voice Interface
+    'voice.title': 'Voice Career Assistant',
     'voice.startListening': 'Start Voice Query',
     'voice.stopListening': 'Stop Listening',
     'voice.listening': 'Listening...',
@@ -52,6 +53,13 @@ const translations: Record<Language, Record<string, string>> = {
     'voice.speaking': 'Speaking recommendations...',
     'voice.fallback': 'Use Text Instead',
     'voice.fallback.title': 'Type your question instead:',
+    'voice.notAvailable': 'Voice Not Available',
+    'voice.notSupported': 'Voice recognition is not supported in your browser. Please use Chrome, Edge, or Android browser for voice features.',
+    'voice.career': 'Career',
+    'voice.skillRoadmap': 'Skill Roadmap',
+    'voice.skillsToLearn': 'Skills to Learn',
+    'voice.resources': 'Recommended Resources',
+    'voice.replay': 'Replay Recommendation',
     
     // AI Recommendations
     'ai.recommendation': 'Based on your interest in AI, I recommend exploring careers as a Machine Learning Engineer, Data Scientist, or AI Research Scientist. These fields offer excellent growth prospects with average salaries ranging from ₹8-25 lakhs per year in India.',
@@ -125,6 +133,7 @@ const translations: Record<Language, Record<string, string>> = {
     'features.connections.desc': 'अपने कौशल को भारत में सक्रिय रूप से भर्ती करने वाले शीर्ष क्षेत्रों और कंपनियों के साथ जोड़ें।',
     
     // Voice Interface
+    'voice.title': 'वॉयस करियर असिस्टेंट',
     'voice.startListening': 'वॉयस क्वेरी शुरू करें',
     'voice.stopListening': 'सुनना बंद करें',
     'voice.listening': 'सुन रहे हैं...',
@@ -136,6 +145,13 @@ const translations: Record<Language, Record<string, string>> = {
     'voice.speaking': 'सिफारिशें बोल रहे हैं...',
     'voice.fallback': 'बजाय टेक्स्ट का उपयोग करें',
     'voice.fallback.title': 'बजाय अपना प्रश्न टाइप करें:',
+    'voice.notAvailable': 'वॉयस उपलब्ध नहीं',
+    'voice.notSupported': 'आपके ब्राउज़र में वॉयस रिकग्निशन समर्थित नहीं है। वॉयस सुविधाओं के लिए कृपया Chrome, Edge, या Android ब्राउज़र का उपयोग करें।',
+    'voice.career': 'करियर',
+    'voice.skillRoadmap': 'कौशल रोडमैप',
+    'voice.skillsToLearn': 'सीखने के लिए कौशल',
+    'voice.resources': 'अनुशंसित संसाधन',
+    'voice.replay': 'सिफारिश रिप्ले करें',
     
     // AI Recommendations
     'ai.recommendation': 'AI में आपकी रुचि के आधार पर, मैं मशीन लर्निंग इंजीनियर, डेटा साइंटिस्ट, या AI रिसर्च साइंटिस्ट के रूप में करियर खोजने की सलाह देता हूं। ये क्षेत्र भारत में ₹8-25 लाख प्रति वर्ष की औसत वेतन के साथ उत्कृष्ट विकास संभावनाएं प्रदान करते हैं।',
@@ -190,6 +206,7 @@ const translations: Record<Language, Record<string, string>> = {
     'hero.stats.accuracy': '98% ચોકસાઈ દર',
     
     // Voice Interface
+    'voice.title': 'વૉઇસ કારકિર્દી સહાયક',
     'voice.startListening': 'વૉઇસ ક્વેરી શરૂ કરો',
     'voice.stopListening': 'સાંભળવાનું બંધ કરો',
     'voice.listening': 'સાંભળી રહ્યાં છીએ...',
@@ -198,6 +215,15 @@ const translations: Record<Language, Record<string, string>> = {
     'voice.error': 'તમારા બ્રાઉઝરમાં વૉઇસ રિકગ્નિશન ઉપલબ્ધ નથી',
     'voice.noSpeech': 'કોઈ વાણીનું પ્રમાણ મળ્યું નથી. કૃપા કરીને ફરી પ્રયાસ કરો.',
     'voice.speaking': 'સિફારિશો બોલી રહ્યાં છીએ...',
+    'voice.fallback': 'તેના બદલે ટેક્સ્ટ વાપરો',
+    'voice.fallback.title': 'તેના બદલે તમારો પ્રશ્ન ટાઇપ કરો:',
+    'voice.notAvailable': 'વૉઇસ ઉપલબ્ધ નથી',
+    'voice.notSupported': 'તમારા બ્રાઉઝરમાં વૉઇસ રિકગ્નિશન સપોર્ટેડ નથી. વૉઇસ ફીચર્સ માટે કૃપા કરીને Chrome, Edge, અથવા Android બ્રાઉઝર વાપરો.',
+    'voice.career': 'કારકિર્દી',
+    'voice.skillRoadmap': 'કૌશલ્ય રોડમેપ',
+    'voice.skillsToLearn': 'શીખવાની કૌશલ્યો',
+    'voice.resources': 'ભલામણ કરેલ સંસાધનો',
+    'voice.replay': 'સિફારિશ રિપ્લે કરો',
     
     // Opportunities
     'opportunities.title': 'તમારા માટે તકો',
@@ -229,14 +255,25 @@ const translations: Record<Language, Record<string, string>> = {
     'hero.stats.accuracy': '98% துல்லியம் விகிதம்',
     
     // Voice Interface
+    'voice.title': 'குரல் தொழில் உதவியாளர்',
     'voice.startListening': 'குரல் வினவல் தொடங்கு',
     'voice.stopListening': 'கேட்பதை நிறுத்து',
     'voice.listening': 'கேட்டுக்கொண்டிருக்கிறது...',
     'voice.processing': 'உங்கள் வினவலை செயலாக்குகிறது...',
     'voice.placeholder': 'உங்கள் தொழில் பாதையைப் பற்றி என்னிடம் கேளுங்கள், "AI மற்றும் கணிதத்திற்கான தொழிலை பரிந்துரைக்கவும்"',
     'voice.error': 'உங்கள் உலாவியில் குரல் அடையாளம் கிடைக்கவில்லை',
+    'voice.error.process': 'மன்னிக்கவும், உங்கள் கோரிக்கையை நான் செயலாக்க முடியவில்லை. தயவுசெய்து மீண்டும் முயற்சிக்கவும்.',
     'voice.noSpeech': 'பேச்சு கண்டறியப்படவில்லை. மீண்டும் முயற்சிக்கவும்.',
     'voice.speaking': 'பரிந்துரைகளைச் சொல்கிறது...',
+    'voice.fallback': 'அதற்கு பதிலாக உரையைப் பயன்படுத்துங்கள்',
+    'voice.fallback.title': 'அதற்கு பதிலாக உங்கள் கேள்வியை டைப் செய்யுங்கள்:',
+    'voice.notAvailable': 'குரல் கிடைக்கவில்லை',
+    'voice.notSupported': 'உங்கள் உலாவியில் குரல் அடையாளம் ஆதரிக்கப்படவில்லை. குரல் அம்சங்களுக்கு Chrome, Edge, அல்லது Android உலாவியைப் பயன்படுத்தவும்.',
+    'voice.career': 'தொழில்',
+    'voice.skillRoadmap': 'திறன் வழிகாட்டி',
+    'voice.skillsToLearn': 'கற்க வேண்டிய திறன்கள்',
+    'voice.resources': 'பரிந்துரைக்கப்பட்ட வளங்கள்',
+    'voice.replay': 'பரிந்துரை மீண்டும் இயக்கு',
     
     // Opportunities
     'opportunities.title': 'உங்களுக்கான வாய்ப்புகள்',
@@ -263,11 +300,25 @@ const translations: Record<Language, Record<string, string>> = {
     'hero.cta.explore': 'সম্পদ অন্বেষণ করুন',
     
     // Voice Interface - Bengali
+    'voice.title': 'ভয়েস ক্যারিয়ার সহায়ক',
     'voice.startListening': 'ভয়েস কুয়েরি শুরু করুন',
     'voice.stopListening': 'শোনা বন্ধ করুন',
     'voice.listening': 'শুনছি...',
     'voice.processing': 'আপনার কুয়েরি প্রক্রিয়া করছি...',
     'voice.placeholder': 'আপনার ক্যারিয়ার পথ সম্পর্কে আমাকে জিজ্ঞাসা করুন',
+    'voice.error': 'আপনার ব্রাউজারে ভয়েস রিকগনিশন উপলব্ধ নেই',
+    'voice.error.process': 'দুঃখিত, আমি আপনার অনুরোধ প্রক্রিয়া করতে পারিনি। অনুগ্রহ করে আবার চেষ্টা করুন।',
+    'voice.noSpeech': 'কোন বক্তৃতা সনাক্ত করা যায়নি। অনুগ্রহ করে আবার চেষ্টা করুন।',
+    'voice.speaking': 'সুপারিশ বলছি...',
+    'voice.fallback': 'পরিবর্তে টেক্সট ব্যবহার করুন',
+    'voice.fallback.title': 'পরিবর্তে আপনার প্রশ্ন টাইপ করুন:',
+    'voice.notAvailable': 'ভয়েস উপলব্ধ নেই',
+    'voice.notSupported': 'আপনার ব্রাউজারে ভয়েস রিকগনিশন সমর্থিত নয়। ভয়েস ফিচারের জন্য Chrome, Edge, বা Android ব্রাউজার ব্যবহার করুন।',
+    'voice.career': 'ক্যারিয়ার',
+    'voice.skillRoadmap': 'দক্ষতা রোডম্যাপ',
+    'voice.skillsToLearn': 'শেখার দক্ষতা',
+    'voice.resources': 'সুপারিশকৃত সম্পদ',
+    'voice.replay': 'সুপারিশ রিপ্লে করুন',
     
     // Opportunities - Bengali
     'opportunities.title': 'আপনার জন্য সুযোগ',
@@ -289,9 +340,25 @@ const translations: Record<Language, Record<string, string>> = {
     'hero.subtitle': 'అధునాతన AI ద్వారా వ్యక్తిగతీకరించిన కెరీర్ సిఫార్సులను పొందండి। ప్రత్యేకంగా భారతీయ విద్యార్థుల కోసం రూపొందించబడింది.',
     
     // Voice Interface - Telugu
+    'voice.title': 'వాయిస్ కెరీర్ సహాయకుడు',
     'voice.startListening': 'వాయిస్ క్వేరీ ప్రారంభించండి',
+    'voice.stopListening': 'వినడం ఆపండి',
     'voice.listening': 'వింటున్నాం...',
     'voice.processing': 'మీ క్వేరీని ప్రాసెస్ చేస్తున్నాం...',
+    'voice.placeholder': 'మీ కెరీర్ మార్గం గురించి నన్ను అడగండి, "AI మరియు గణితం కోసం కెరీర్ సూచించండి"',
+    'voice.error': 'మీ బ్రౌజర్‌లో వాయిస్ రికగ్నిషన్ అందుబాటులో లేదు',
+    'voice.error.process': 'క్షమించండి, మీ అభ్యర్థనను నేను ప్రాసెస్ చేయలేకపోయాను. దయచేసి మళ్లీ ప్రయత్నించండి.',
+    'voice.noSpeech': 'ఎలాంటి మాట కనుగొనబడలేదు. దయచేసి మళ్లీ ప్రయత్నించండి.',
+    'voice.speaking': 'సిఫార్సులు చెబుతున్నాం...',
+    'voice.fallback': 'బదులుగా టెక్స్ట్ ఉపయోగించండి',
+    'voice.fallback.title': 'బదులుగా మీ ప్రశ్నను టైప్ చేయండి:',
+    'voice.notAvailable': 'వాయిస్ అందుబాటులో లేదు',
+    'voice.notSupported': 'మీ బ్రౌజర్‌లో వాయిస్ రికగ్నిషన్ మద్దతు లేదు. వాయిస్ ఫీచర్‌ల కోసం Chrome, Edge, లేదా Android బ్రౌజర్ ఉపయోగించండి.',
+    'voice.career': 'కెరీర్',
+    'voice.skillRoadmap': 'నైపుణ్య రోడ్‌మ్యాప్',
+    'voice.skillsToLearn': 'నేర్చుకోవాల్సిన నైపుణ్యాలు',
+    'voice.resources': 'సిఫార్సు చేయబడిన వనరులు',
+    'voice.replay': 'సిఫార్సు రీప్లే చేయండి',
     
     // Opportunities - Telugu
     'opportunities.title': 'మీ కోసం అవకాశాలు',
@@ -312,9 +379,25 @@ const translations: Record<Language, Record<string, string>> = {
     'hero.subtitle': 'प्रगत AI द्वारे चालवलेल्या वैयक्तिक करिअर शिफारसी मिळवा। विशेषतः भारतीय विद्यार्थ्यांसाठी डिझाइन केलेले.',
     
     // Voice Interface - Marathi
+    'voice.title': 'व्हॉईस करिअर सहाय्यक',
     'voice.startListening': 'व्हॉईस क्वेरी सुरू करा',
+    'voice.stopListening': 'ऐकणे थांबवा',
     'voice.listening': 'ऐकत आहे...',
     'voice.processing': 'तुमची क्वेरी प्रक्रिया करत आहे...',
+    'voice.placeholder': 'तुमच्या करिअर मार्गाबद्दल मला विचारा, "AI आणि गणितासाठी करिअर सुचवा"',
+    'voice.error': 'तुमच्या ब्राउझरमध्ये व्हॉईस रिकग्निशन उपलब्ध नाही',
+    'voice.error.process': 'माफ करा, मी तुमची विनंती प्रक्रिया करू शकलो नाही. कृपया पुन्हा प्रयत्न करा.',
+    'voice.noSpeech': 'कोणतेही भाषण आढळले नाही. कृपया पुन्हा प्रयत्न करा.',
+    'voice.speaking': 'शिफारसी सांगत आहे...',
+    'voice.fallback': 'त्याऐवजी मजकूर वापरा',
+    'voice.fallback.title': 'त्याऐवजी तुमचा प्रश्न टाइप करा:',
+    'voice.notAvailable': 'व्हॉईस उपलब्ध नाही',
+    'voice.notSupported': 'तुमच्या ब्राउझरमध्ये व्हॉईस रिकग्निशनला समर्थन नाही. व्हॉईस वैशिष्ट्यांसाठी Chrome, Edge, किंवा Android ब्राउझर वापरा.',
+    'voice.career': 'करिअर',
+    'voice.skillRoadmap': 'कौशल्य रोडमॅप',
+    'voice.skillsToLearn': 'शिकण्यासाठी कौशल्ये',
+    'voice.resources': 'शिफारस केलेली संसाधने',
+    'voice.replay': 'शिफारस रिप्ले करा',
     
     // Opportunities - Marathi
     'opportunities.title': 'तुमच्यासाठी संधी',
@@ -335,9 +418,25 @@ const translations: Record<Language, Record<string, string>> = {
     'hero.subtitle': 'ಸುಧಾರಿತ AI ಯಿಂದ ನಡೆಸಲ್ಪಡುವ ವೈಯಕ್ತಿಕ ವೃತ್ತಿಜೀವನದ ಶಿಫಾರಸುಗಳನ್ನು ಪಡೆದುಕೊಳ್ಳಿ.',
     
     // Voice Interface - Kannada
+    'voice.title': 'ವಾಯ್ಸ್ ವೃತ್ತಿಜೀವನ ಸಹಾಯಕ',
     'voice.startListening': 'ವಾಯ್ಸ್ ಕ್ವೆರಿ ಪ್ರಾರಂಭಿಸಿ',
+    'voice.stopListening': 'ಕೇಳುವುದನ್ನು ನಿಲ್ಲಿಸಿ',
     'voice.listening': 'ಕೇಳುತ್ತಿದೆ...',
     'voice.processing': 'ನಿಮ್ಮ ಕ್ವೆರಿಯನ್ನು ಪ್ರಕ್ರಿಯೆಗೊಳಿಸುತ್ತಿದೆ...',
+    'voice.placeholder': 'ನಿಮ್ಮ ವೃತ್ತಿಜೀವನದ ಮಾರ್ಗದ ಬಗ್ಗೆ ನನ್ನನ್ನು ಕೇಳಿ, "AI ಮತ್ತು ಗಣಿತಕ್ಕಾಗಿ ವೃತ್ತಿಜೀವನವನ್ನು ಸೂಚಿಸಿ"',
+    'voice.error': 'ನಿಮ್ಮ ಬ್ರೌಸರ್‌ನಲ್ಲಿ ವಾಯ್ಸ್ ರಿಕಗ್ನಿಷನ್ ಲಭ್ಯವಿಲ್ಲ',
+    'voice.error.process': 'ಕ್ಷಮಿಸಿ, ನಾನು ನಿಮ್ಮ ವಿನಂತಿಯನ್ನು ಪ್ರಕ್ರಿಯೆಗೊಳಿಸಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.',
+    'voice.noSpeech': 'ಯಾವುದೇ ಮಾತು ಪತ್ತೆಯಾಗಿಲ್ಲ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.',
+    'voice.speaking': 'ವೃತ್ತಿಜೀವನ ಶಿಫಾರಸುಗಳನ್ನು ಹೇಳುತ್ತಿದೆ...',
+    'voice.fallback': 'ಬದಲಿಗೆ ಪಠ್ಯವನ್ನು ಬಳಸಿ',
+    'voice.fallback.title': 'ಬದಲಿಗೆ ನಿಮ್ಮ ಪ್ರಶ್ನೆಯನ್ನು ಟೈಪ್ ಮಾಡಿ:',
+    'voice.notAvailable': 'ವಾಯ್ಸ್ ಲಭ್ಯವಿಲ್ಲ',
+    'voice.notSupported': 'ನಿಮ್ಮ ಬ್ರೌಸರ್‌ನಲ್ಲಿ ವಾಯ್ಸ್ ರಿಕಗ್ನಿಷನ್ ಬೆಂಬಲಿತವಾಗಿಲ್ಲ. ವಾಯ್ಸ್ ವೈಶಿಷ್ಟ್ಯಗಳಿಗಾಗಿ Chrome, Edge, ಅಥವಾ Android ಬ್ರೌಸರ್ ಬಳಸಿ.',
+    'voice.career': 'ವೃತ್ತಿಜೀವನ',
+    'voice.skillRoadmap': 'ಕೌಶಲ್ಯ ರೋಡ್‌ಮ್ಯಾಪ್',
+    'voice.skillsToLearn': 'ಕಲಿಯಬೇಕಾದ ಕೌಶಲ್ಯಗಳು',
+    'voice.resources': 'ಶಿಫಾರಸು ಮಾಡಿದ ಸಂಪನ್ಮೂಲಗಳು',
+    'voice.replay': 'ಶಿಫಾರಸು ಮರುಪ್ಲೇ ಮಾಡಿ',
     
     // Opportunities - Kannada
     'opportunities.title': 'ನಿಮಗಾಗಿ ಅವಕಾಶಗಳು',
@@ -358,9 +457,25 @@ const translations: Record<Language, Record<string, string>> = {
     'hero.subtitle': 'വിപുലമായ AI ഉപയോഗിച്ച് വ്യക്തിഗതമാക്കിയ കരിയർ ശുപാർശകൾ നേടുക. പ്രത്യേകിച്ച് ഇന്ത്യൻ വിദ്യാർത്ഥികൾക്കായി രൂപകൽപ്പന ചെയ്തിട്ടുള്ളത്.',
     
     // Voice Interface - Malayalam
+    'voice.title': 'വോയ്‌സ് കരിയർ സഹായി',
     'voice.startListening': 'വോയ്‌സ് ക്വറി ആരംഭിക്കുക',
+    'voice.stopListening': 'കേൾക്കുന്നത് നിർത്തുക',
     'voice.listening': 'കേൾക്കുന്നു...',
     'voice.processing': 'നിങ്ങളുടെ ക്വറി പ്രോസസ്സ് ചെയ്യുന്നു...',
+    'voice.placeholder': 'നിങ്ങളുടെ കരിയർ പാതയെക്കുറിച്ച് എന്നോട് ചോദിക്കുക, "AI ഉം ഗണിതവും കരിയർ നിർദ്ദേശിക്കുക"',
+    'voice.error': 'നിങ്ങളുടെ ബ്രൗസറിൽ വോയ്‌സ് റിക്കഗ്നിഷൻ ലഭ്യമല്ല',
+    'voice.error.process': 'ക്ഷമിക്കുക, എനിക്ക് നിങ്ങളുടെ അഭ്യർത്ഥന പ്രോസസ്സ് ചെയ്യാൻ കഴിഞ്ഞില്ല. ദയവായി വീണ്ടും ശ്രമിക്കുക.',
+    'voice.noSpeech': 'സംസാരം കണ്ടെത്തിയില്ല. ദയവായി വീണ്ടും ശ്രമിക്കുക.',
+    'voice.speaking': 'ശുപാർശകൾ പറയുന്നു...',
+    'voice.fallback': 'പകരം ടെക്സ്റ്റ് ഉപയോഗിക്കുക',
+    'voice.fallback.title': 'പകരം നിങ്ങളുടെ ചോദ്യം ടൈപ്പ് ചെയ്യുക:',
+    'voice.notAvailable': 'വോയ്‌സ് ലഭ്യമല്ല',
+    'voice.notSupported': 'നിങ്ങളുടെ ബ്രൗസറിൽ വോയ്‌സ് റിക്കഗ്നിഷൻ പിന്തുണയില്ല. വോയ്‌സ് ഫീച്ചറുകൾക്കായി Chrome, Edge, അല്ലെങ്കിൽ Android ബ്രൗസർ ഉപയോഗിക്കുക.',
+    'voice.career': 'കരിയർ',
+    'voice.skillRoadmap': 'വൈദഗ്ധ്യ റോഡ്മാപ്പ്',
+    'voice.skillsToLearn': 'പഠിക്കേണ്ട വൈദഗ്ധ്യങ്ങൾ',
+    'voice.resources': 'ശുപാർശ ചെയ്ത വിഭവങ്ങൾ',
+    'voice.replay': 'ശുപാർശ റീപ്ലേ ചെയ്യുക',
     
     // Opportunities - Malayalam
     'opportunities.title': 'നിങ്ങൾക്കുള്ള അവസരങ്ങൾ',
