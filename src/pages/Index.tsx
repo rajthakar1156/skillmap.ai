@@ -7,7 +7,7 @@ import { Compass, Target, TrendingUp, Users, CheckCircle, Sparkles, ArrowRight, 
 import Header from "@/components/Header";
 import { BackgroundBeams } from "@/components/ui/background-beams";
 import { BackgroundGradient } from "@/components/ui/background-gradient";
-import { TextGenerateEffect } from "@/components/ui/text-generate-effect";
+import gsap from "gsap";
 import { GridBackground } from "@/components/ui/grid-background";
 import { motion } from "framer-motion";
 import { useLanguage } from "../contexts/LanguageContext";
@@ -17,6 +17,26 @@ const Index = () => {
   const navigate = useNavigate();
   const { translate } = useLanguage();
   const [showVoiceInterface, setShowVoiceInterface] = useState(false);
+
+  // Professional GSAP animation for subtitle
+  React.useEffect(() => {
+    const subtitle = document.querySelector('.hero-subtitle');
+    if (subtitle) {
+      gsap.fromTo(subtitle, 
+        {
+          opacity: 0,
+          y: 20
+        },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 1,
+          delay: 0.5,
+          ease: "power2.out"
+        }
+      );
+    }
+  }, []);
 
   // Enhanced AI career recommendation function
   const handleVoiceQuery = async (query: string): Promise<string> => {
@@ -149,10 +169,9 @@ const Index = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.4 }}
             >
-              <TextGenerateEffect 
-                words={translate('hero.subtitle', 'Get personalized career recommendations powered by advanced AI. Designed specifically for Indian students to navigate the modern job market with confidence.')}
-                className="text-lg sm:text-xl lg:text-2xl text-muted-foreground mb-8 max-w-3xl mx-auto leading-relaxed"
-              />
+              <p className="hero-subtitle text-lg sm:text-xl lg:text-2xl text-muted-foreground mb-8 max-w-3xl mx-auto leading-relaxed">
+                {translate('hero.subtitle', 'Get personalized career recommendations powered by advanced AI. Designed specifically for Indian students to navigate the modern job market with confidence.')}
+              </p>
             </motion.div>
             
             <motion.div

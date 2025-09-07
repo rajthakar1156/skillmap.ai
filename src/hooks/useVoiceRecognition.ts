@@ -23,6 +23,17 @@ export const useVoiceRecognition = ({
     browserSupportsSpeechRecognition
   } = useSpeechRecognition();
 
+  // Update language when it changes
+  useEffect(() => {
+    if (isListening) {
+      // Restart listening with new language
+      stopListening();
+      setTimeout(() => {
+        startListening();
+      }, 100);
+    }
+  }, [lang]);
+
   // Handle final transcript
   useEffect(() => {
     if (finalTranscript && finalTranscript.trim()) {
