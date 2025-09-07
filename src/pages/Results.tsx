@@ -23,6 +23,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { getCareerResources, CareerResourceItem, getPapersAndVideos, CareerPaperOrVideo, getCareerJobs, CareerJobItem } from "@/integrations/ai/careerRecommender";
 
 interface Course {
   id: string;
@@ -180,29 +181,73 @@ export default function Results() {
   const [jobs, setJobs] = useState<Job[]>([]);
   const [filteredCourses, setFilteredCourses] = useState<Course[]>([]);
   const [filteredJobs, setFilteredJobs] = useState<Job[]>([]);
+  const [papersVideos, setPapersVideos] = useState<CareerPaperOrVideo[]>([]);
+  const [loadingResources, setLoadingResources] = useState(false);
+  const [resourceError, setResourceError] = useState<string | null>(null);
 
-  // Simulate API calls
+  // Fetch AI resources + simulate jobs
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
       setError(null);
-      
+      setLoadingResources(true);
+      setResourceError(null);
       try {
-        // Simulate API delay
-        await new Promise(resolve => setTimeout(resolve, 1500));
-        
-        // In a real implementation, you would fetch data from APIs here
+        const [aiResources, media, aiJobs] = await Promise.all([
+          getCareerResources(careerPath),
+          getPapersAndVideos(careerPath),
+          getCareerJobs(careerPath),
+        ]);
+        // Map AI resources to Course shape minimally
+        const mapped: Course[] = aiResources.slice(0, 9).map((r, idx) => ({
+          id: String(idx + 1),
+          title: r.title,
+          description: r.description || "",
+          platform: r.platform || "Resource",
+          platformLogo: "/api/placeholder/40/40",
+          difficulty: (r.difficulty as any) || "Beginner",
+          duration: r.duration || "",
+          price: r.isFree ? 0 : 0,
+          isFree: !!r.isFree,
+          rating: 5,
+          studentsCount: 0,
+          instructorName: "",
+          courseUrl: r.url,
+          aiRecommended: true,
+        }));
+        setCourses(mapped);
+        setFilteredCourses(mapped);
+        setPapersVideos(media.slice(0, 9));
+        // Map AI jobs minimally into Job shape
+        const mappedJobs: Job[] = aiJobs.slice(0, 9).map((j, idx) => ({
+          id: String(idx + 1),
+          title: j.title,
+          company: j.company || "",
+          location: j.location || "",
+          salaryMin: undefined,
+          salaryMax: undefined,
+          experienceLevel: (j.experience as any) || "Entry Level",
+          jobType: (j.type as any) || "Hybrid",
+          description: "AI-suggested opportunity",
+          postedDate: new Date().toISOString(),
+          applyUrl: j.applyUrl,
+          aiRecommended: true,
+        }));
+        setJobs(mappedJobs);
+        setFilteredJobs(mappedJobs);
+      } catch (err: any) {
+        setResourceError(err?.message || "Failed to load AI resources");
+        // Fallback to mock data
         setCourses(mockCourses);
-        setJobs(mockJobs);
         setFilteredCourses(mockCourses);
+        setJobs(mockJobs);
         setFilteredJobs(mockJobs);
-      } catch (err) {
-        setError("Failed to load recommendations. Please try again.");
+        setPapersVideos([]);
       } finally {
+        setLoadingResources(false);
         setIsLoading(false);
       }
     };
-    
     fetchData();
   }, [careerPath]);
 
@@ -524,10 +569,10 @@ export default function Results() {
             {/* Course Results */}
             {isLoading ? (
               <LoadingSkeleton />
-            ) : error ? (
+            ) : error || resourceError ? (
               <Alert variant="destructive">
                 <AlertCircle className="h-4 w-4" />
-                <AlertDescription>{error}</AlertDescription>
+                <AlertDescription>{error || resourceError}</AlertDescription>
               </Alert>
             ) : (
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -535,6 +580,40 @@ export default function Results() {
                   <CourseCard key={course.id} course={course} />
                 ))}
               </div>
+            )}
+
+            {/* Papers & Videos */}
+            {!isLoading && papersVideos.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Papers & Videos</CardTitle>
+                  <CardDescription>Curated media tailored to {careerPath}</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid gap-3">
+                    {papersVideos.map((item, idx) => (
+                      <div key={idx} className="flex items-start justify-between gap-4 p-3 border rounded-md">
+                        <div>
+                          <div className="font-medium">
+                            {item.type === 'paper' ? '📄' : '🎬'} {item.title}
+                          </div>
+                          {item.summary && (
+                            <div className="text-sm text-muted-foreground line-clamp-2">{item.summary}</div>
+                          )}
+                          {item.source && (
+                            <div className="text-xs mt-1">Source: {item.source}</div>
+                          )}
+                        </div>
+                        <Button asChild size="sm" variant="outline">
+                          <a href={item.url} target="_blank" rel="noopener noreferrer">
+                            Open <ExternalLink className="w-4 h-4 ml-1" />
+                          </a>
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
             )}
           </TabsContent>
 
