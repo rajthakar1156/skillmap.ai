@@ -228,9 +228,12 @@ export default function ResumeBuilder() {
       const data = form.getValues();
       console.log("Form data retrieved:", !!data.personalInfo.fullName);
       
-      // Validate required data
-      if (!data.personalInfo.fullName || !data.personalInfo.email) {
-        throw new Error("Please fill in all required personal information fields");
+      // Do not hard fail on missing fields; use sensible defaults so preview always works
+      if (!data.personalInfo.fullName) {
+        data.personalInfo.fullName = "Your Name" as any;
+      }
+      if (!data.personalInfo.email) {
+        data.personalInfo.email = "" as any;
       }
       
       console.log("Starting PDF generation...");
@@ -394,7 +397,7 @@ export default function ResumeBuilder() {
       pdf.setFont("helvetica", "normal");
       pdf.setTextColor(0, 0, 0);
       
-      const objectiveText = `Seeking a ${data.careerPath} position to leverage my skills and experience in ${data.skills.slice(0, 3).join(', ')} to contribute to organizational growth and career advancement.`;
+      const objectiveText = `Seeking a ${data.careerPath || 'Professional'} position to leverage my skills and experience in ${data.skills.slice(0, 3).join(', ') || 'relevant areas'} to contribute to organizational growth and career advancement.`;
       const objectiveLines = pdf.splitTextToSize(objectiveText, contentWidth);
       pdf.text(objectiveLines, margin, yPosition);
       yPosition += objectiveLines.length * 4 + 8;
@@ -404,7 +407,7 @@ export default function ResumeBuilder() {
       pdf.setFontSize(10);
       pdf.setFont("helvetica", "normal");
       pdf.setTextColor(0, 0, 0);
-      const summaryLines = pdf.splitTextToSize(data.summary, contentWidth);
+      const summaryLines = pdf.splitTextToSize(data.summary || 'Dedicated professional eager to contribute value and grow.', contentWidth);
       pdf.text(summaryLines, margin, yPosition);
       yPosition += summaryLines.length * 4 + 8;
       
@@ -416,10 +419,10 @@ export default function ResumeBuilder() {
       
       // Group skills into categories for better ATS parsing
       const suggestions = getSuggestions();
-      const technicalSkills = data.skills.filter(skill => 
+      const technicalSkills = (data.skills || []).filter(skill => 
         suggestions?.skills.some(s => s.toLowerCase().includes(skill.toLowerCase()))
       );
-      const otherSkills = data.skills.filter(skill => !technicalSkills.includes(skill));
+      const otherSkills = (data.skills || []).filter(skill => !technicalSkills.includes(skill));
       
       if (technicalSkills.length > 0) {
         const techSkillsText = `Technical: ${technicalSkills.join(', ')}`;
@@ -438,7 +441,7 @@ export default function ResumeBuilder() {
       // Professional Experience - ATS Format
       yPosition = addSectionHeader("Professional Experience", yPosition);
       
-      data.experience.forEach((exp, index) => {
+      (data.experience || []).forEach((exp, index) => {
         yPosition = checkPageBreak(yPosition, 25);
         
         // Job Title - Bold and prominent
@@ -465,7 +468,7 @@ export default function ResumeBuilder() {
       // Education Section
       yPosition = addSectionHeader("Education", yPosition);
       
-      data.education.forEach((edu) => {
+      (data.education || []).forEach((edu) => {
         yPosition = checkPageBreak(yPosition, 15);
         
         pdf.setFontSize(11);
