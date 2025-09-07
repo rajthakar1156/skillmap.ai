@@ -18,7 +18,7 @@ interface DownloadRoadmapPDFProps {
 
 const loadImageAsDataUrl = async (src: string): Promise<string | null> => {
   try {
-    const response = await fetch(src, { mode: "cors" });
+    const response = await fetch(src);
     const blob = await response.blob();
     return await new Promise((resolve) => {
       const reader = new FileReader();
@@ -50,16 +50,23 @@ const DownloadRoadmapPDF: React.FC<DownloadRoadmapPDFProps> = ({
       const contentWidth = pageWidth - margin * 2;
 
       // Branding logo (centered)
+      // Try relative path first (works under base paths), then absolute root
       const logoDataUrl =
+        (await loadImageAsDataUrl("lovable-uploads/b59b9ebf-45c8-4202-854a-64d32ac843ae.png")) ||
         (await loadImageAsDataUrl("/lovable-uploads/b59b9ebf-45c8-4202-854a-64d32ac843ae.png")) ||
+        (await loadImageAsDataUrl("favicon.ico")) ||
         (await loadImageAsDataUrl("/favicon.ico"));
       let y = margin;
       if (logoDataUrl) {
-        const imgWidth = 28;
-        const imgHeight = 28;
-        const x = (pageWidth - imgWidth) / 2;
-        doc.addImage(logoDataUrl, "PNG", x, y, imgWidth, imgHeight, undefined, "FAST");
-        y += imgHeight + 4;
+        try {
+          const imgWidth = 28;
+          const imgHeight = 28;
+          const x = (pageWidth - imgWidth) / 2;
+          doc.addImage(logoDataUrl, "PNG", x, y, imgWidth, imgHeight, undefined, "FAST");
+          y += imgHeight + 4;
+        } catch {
+          // ignore logo failure, continue rendering
+        }
       }
 
       // Title
