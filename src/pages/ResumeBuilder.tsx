@@ -635,11 +635,11 @@ export default function ResumeBuilder() {
     }
   }, [showPreview, form]);
 
-  const onSubmit = useCallback((data: ResumeData) => {
+  const onSubmit = useCallback(async (data: ResumeData) => {
     console.log("Form submitted:", data);
-    setShowPreview(true);
-    toast.success("Resume preview ready! You can now download your PDF.");
-  }, []);
+    // Directly generate and open PDF in a new tab for preview + download
+    await generatePDF();
+  }, [generatePDF]);
 
   const nextStep = () => {
     if (currentStep < steps.length - 1) {
