@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ArrowLeft, User, BookOpen, Heart, Target, Trophy } from "lucide-react";
+import { getCareerRecommendation } from "@/integrations/ai/careerRecommender";
 
 interface ProfileData {
   academics: {
@@ -26,6 +27,9 @@ interface ProfileData {
 
 const Profile = () => {
   const navigate = useNavigate();
+  const [recommendedCareer, setRecommendedCareer] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState<ProfileData>({
     academics: {
       class_12_stream: "",
@@ -105,11 +109,19 @@ const Profile = () => {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Store form data and navigate to results
-    localStorage.setItem('profileData', JSON.stringify(formData));
-    navigate('/results');
+    setError(null);
+    setLoading(true);
+    try {
+      localStorage.setItem('profileData', JSON.stringify(formData));
+      const result = await getCareerRecommendation(formData as any);
+      setRecommendedCareer(result.career);
+    } catch (err: any) {
+      setError(err?.message || 'Failed to get recommendation');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const isFormValid = () => {
@@ -317,6 +329,35 @@ const Profile = () => {
               Get My Career Recommendations
             </Button>
           </div>
+
+          {loading && (
+            <div className="text-center text-sm text-muted-foreground">Getting your recommendation...</div>
+          )}
+          {error && (
+            <div className="text-center text-sm text-destructive">{error}</div>
+          )}
+
+          {recommendedCareer && (
+            <Card className="shadow-card border-primary/20 bg-primary/5">
+              <CardHeader>
+                <CardTitle className="text-xl">Your Recommended Career</CardTitle>
+                <CardDescription>
+                  Based on your stream, interests, traits, and values
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold mb-4 text-primary">{recommendedCareer}</div>
+                <div className="flex gap-2">
+                  <Button
+                    variant="default"
+                    onClick={() => navigate('/results', { state: { careerPath: recommendedCareer } })}
+                  >
+                    Explore Resources for {recommendedCareer}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </form>
       </div>
     </div>
