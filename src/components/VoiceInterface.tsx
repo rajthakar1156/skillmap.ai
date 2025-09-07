@@ -8,6 +8,7 @@ import { useVoiceRecognition } from '@/hooks/useVoiceRecognition';
 import { useTextToSpeech } from '@/hooks/useTextToSpeech';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { motion, AnimatePresence } from 'framer-motion';
+import DownloadRoadmapPDF from '@/components/DownloadRoadmapPDF';
 
 interface CareerRecommendation {
   career: string;
@@ -452,6 +453,14 @@ const VoiceInterface: React.FC<VoiceInterfaceProps> = ({ onVoiceQuery, className
                         )}
                       </React.Fragment>
                     ))}
+                  </div>
+                  <div className="mt-4">
+                    <DownloadRoadmapPDF
+                      careerName={careerRecommendation.career}
+                      roadmap={careerRecommendation.skillRoadmap}
+                      missingSkills={careerRecommendation.missingSkills}
+                      resources={careerRecommendation.resources}
+                    />
                   </div>
                 </div>
 
