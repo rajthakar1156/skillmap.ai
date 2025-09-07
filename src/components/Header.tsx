@@ -65,11 +65,9 @@ const Header = () => {
             className="flex items-center space-x-2 cursor-pointer hover:opacity-80 transition-opacity"
             onClick={() => navigate('/')}
           >
-            <img 
-              src="/lovable-uploads/b59b9ebf-45c8-4202-854a-64d32ac843ae.png" 
-              alt="SkillMap.AI Logo" 
-              className="w-8 h-8 object-contain"
-            />
+            <div className="flex items-center justify-center w-8 h-8 bg-gradient-primary rounded-lg">
+              <Compass className="h-5 w-5 text-white" />
+            </div>
             <span className="text-xl font-bold bg-gradient-primary bg-clip-text text-transparent">
               SkillMap.ai
             </span>

@@ -18,7 +18,6 @@ import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import Header from "@/components/Header";
-import { useLanguage } from "@/contexts/LanguageContext";
 
 const resumeSchema = z.object({
   personalInfo: z.object({
@@ -119,7 +118,6 @@ const aiSuggestions = {
 };
 
 export default function ResumeBuilder() {
-  const { translate } = useLanguage();
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(0);
   const [selectedCareer, setSelectedCareer] = useState("");
@@ -148,14 +146,14 @@ export default function ResumeBuilder() {
   });
 
   const steps = [
-    { id: "personal", title: translate('resume.builder.personal.title', 'Personal Info'), description: translate('resume.builder.personal.description', 'Basic contact information') },
-    { id: "career", title: translate('resume.builder.career.title', 'Career Path'), description: translate('resume.builder.career.description', 'Select your target role') },
-    { id: "summary", title: translate('resume.builder.summary.title', 'Summary'), description: translate('resume.builder.summary.description', 'Professional summary') },
-    { id: "education", title: translate('resume.builder.education.title', 'Education'), description: translate('resume.builder.education.description', 'Academic background') },
-    { id: "skills", title: translate('resume.builder.skills.title', 'Skills'), description: translate('resume.builder.skills.description', 'Technical and soft skills') },
-    { id: "experience", title: translate('resume.builder.experience.title', 'Experience'), description: translate('resume.builder.experience.description', 'Work experience') },
-    { id: "projects", title: translate('resume.builder.projects.title', 'Projects'), description: translate('resume.builder.projects.description', 'Notable projects') },
-    { id: "achievements", title: translate('resume.builder.achievements.title', 'Achievements'), description: translate('resume.builder.achievements.description', 'Awards and recognitions') },
+    { id: "personal", title: "Personal Info", description: "Basic contact information" },
+    { id: "career", title: "Career Path", description: "Select your target role" },
+    { id: "summary", title: "Summary", description: "Professional summary" },
+    { id: "education", title: "Education", description: "Academic background" },
+    { id: "skills", title: "Skills", description: "Technical and soft skills" },
+    { id: "experience", title: "Experience", description: "Work experience" },
+    { id: "projects", title: "Projects", description: "Notable projects" },
+    { id: "achievements", title: "Achievements", description: "Awards and recognitions" },
   ];
 
   const addEducation = () => {
@@ -671,26 +669,26 @@ export default function ResumeBuilder() {
                 control={form.control}
                 name="personalInfo.fullName"
                 render={({ field }) => (
-                   <FormItem>
-                     <FormLabel>{translate('resume.builder.personal.fullName', 'Full Name')}</FormLabel>
-                     <FormControl>
-                       <Input placeholder="John Doe" {...field} />
-                     </FormControl>
-                     <FormMessage />
-                   </FormItem>
+                  <FormItem>
+                    <FormLabel>Full Name</FormLabel>
+                    <FormControl>
+                      <Input placeholder="John Doe" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
                 )}
               />
               <FormField
                 control={form.control}
                 name="personalInfo.email"
                 render={({ field }) => (
-                   <FormItem>
-                     <FormLabel>{translate('resume.builder.personal.email', 'Email')}</FormLabel>
-                     <FormControl>
-                       <Input placeholder="john@example.com" type="email" {...field} />
-                     </FormControl>
-                     <FormMessage />
-                   </FormItem>
+                  <FormItem>
+                    <FormLabel>Email</FormLabel>
+                    <FormControl>
+                      <Input placeholder="john@example.com" type="email" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
                 )}
               />
             </div>
@@ -1494,17 +1492,17 @@ export default function ResumeBuilder() {
       <Header />
       <div className="container mx-auto px-4 py-8">
         <div className="mb-8">
-            <Button
-              variant="ghost"
-              onClick={() => navigate("/")}
-              className="mb-4"
-            >
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              {translate('resume.builder.back', 'Back to Home')}
-            </Button>
-          <h1 className="text-3xl font-bold mb-2">{translate('resume.builder.title', 'AI-Powered Resume Builder')}</h1>
+          <Button
+            variant="ghost"
+            onClick={() => navigate("/")}
+            className="mb-4"
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Home
+          </Button>
+          <h1 className="text-3xl font-bold mb-2">AI-Powered Resume Builder</h1>
           <p className="text-muted-foreground">
-            {translate('resume.builder.subtitle', 'Create a professional resume tailored to your career path with AI suggestions')}
+            Create a professional resume tailored to your career path with AI suggestions
           </p>
         </div>
 
@@ -1513,9 +1511,9 @@ export default function ResumeBuilder() {
           <div className="lg:col-span-1">
             <Card>
               <CardHeader>
-                <CardTitle>{translate('resume.builder.progress', 'Progress')}</CardTitle>
+                <CardTitle>Progress</CardTitle>
                 <CardDescription>
-                  {translate('resume.builder.step', 'Step')} {currentStep + 1} {translate('resume.builder.of', 'of')} {steps.length}
+                  Step {currentStep + 1} of {steps.length}
                 </CardDescription>
               </CardHeader>
               <CardContent>
