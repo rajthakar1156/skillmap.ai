@@ -12,11 +12,22 @@ export default defineConfig(({ mode }) => ({
       '/api': {
         target: 'https://jsearch.p.rapidapi.com',
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, ''),
+        rewrite: (path) => path.replace(/^\/api/, '/'),
         configure: (proxy, options) => {
           proxy.on('proxyReq', (proxyReq, req, res) => {
             proxyReq.setHeader('x-rapidapi-key', 'dd0a88006dmsh80cfa50b1b5bc60p15e5e7jsn0cc002b17d9c');
             proxyReq.setHeader('x-rapidapi-host', 'jsearch.p.rapidapi.com');
+          });
+        }
+      },
+      '/api-internships': {
+        target: 'https://internships-api.p.rapidapi.com',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api-internships/, '/'),
+        configure: (proxy, options) => {
+          proxy.on('proxyReq', (proxyReq, req, res) => {
+            proxyReq.setHeader('x-rapidapi-key', 'dd0a88006dmsh80cfa50b1b5bc60p15e5e7jsn0cc002b17d9c');
+            proxyReq.setHeader('x-rapidapi-host', 'internships-api.p.rapidapi.com');
           });
         }
       }

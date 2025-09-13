@@ -66,6 +66,32 @@ interface JobSearchResponse {
   data: Job[];
 }
 
+interface Internship {
+  id: string;
+  title: string;
+  company: string;
+  location: string;
+  description: string;
+  requirements: string[];
+  benefits: string[];
+  duration: string;
+  stipend?: string;
+  application_deadline: string;
+  application_link: string;
+  posted_date: string;
+  type: 'internship';
+  tags: string[];
+  is_remote: boolean;
+  experience_level: string;
+}
+
+interface InternshipResponse {
+  internships: Internship[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
 // API service for fetching jobs from RapidAPI
 const fetchJobsFromAPI = async (query: string = 'developer jobs', location: string = 'us', page: number = 1): Promise<Job[]> => {
   try {
@@ -136,6 +162,104 @@ const fetchJobsFromAPI = async (query: string = 'developer jobs', location: stri
   }
 };
 
+// API service for fetching internships from RapidAPI
+const fetchInternshipsFromAPI = async (): Promise<Internship[]> => {
+  try {
+    // For now, let's try direct API call to debug the issue
+    const url = 'https://internships-api.p.rapidapi.com/active-ats-7d';
+    const apiKey = 'dd0a88006dmsh80cfa50b1b5bc60p15e5e7jsn0cc002b17d9c';
+    const apiHost = 'internships-api.p.rapidapi.com';
+    
+    console.log('Making Internships API request to:', url);
+    console.log('Using API key:', apiKey.substring(0, 10) + '...');
+    
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'x-rapidapi-key': apiKey,
+        'x-rapidapi-host': apiHost
+      },
+      mode: 'cors'
+    });
+
+    console.log('Internships Response status:', response.status);
+    console.log('Internships Response headers:', Object.fromEntries(response.headers.entries()));
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Internships API Error Response:', errorText);
+      
+      if (response.status === 403) {
+        throw new Error('Internships API access denied. Please check your RapidAPI key and subscription status.');
+      } else if (response.status === 429) {
+        throw new Error('Internships API rate limit exceeded. Please try again later.');
+      } else {
+        throw new Error(`Internships API HTTP error! status: ${response.status} - ${errorText}`);
+      }
+    }
+
+    const data = await response.json();
+    console.log('Internships API Response data:', data);
+    
+    // Handle different response formats
+    let internships: Internship[] = [];
+    
+    if (Array.isArray(data)) {
+      // If response is directly an array
+      internships = data.map((item: any, index: number) => transformInternshipData(item, index));
+    } else if (data.internships && Array.isArray(data.internships)) {
+      // If response has internships property
+      internships = data.internships.map((item: any, index: number) => transformInternshipData(item, index));
+    } else if (data.data && Array.isArray(data.data)) {
+      // If response has data property
+      internships = data.data.map((item: any, index: number) => transformInternshipData(item, index));
+    } else {
+      console.warn('Unexpected internships API response format:', data);
+      return [];
+    }
+    
+    console.log('Successfully fetched', internships.length, 'internships');
+    return internships;
+  } catch (error) {
+    console.error('Error fetching internships from API:', error);
+    
+    // Check if it's a network/CORS error
+    if (error instanceof TypeError && error.message.includes('fetch')) {
+      console.error('This might be a CORS issue. RapidAPI might not allow browser requests.');
+    }
+    
+    // Return mock data as fallback for development
+    return getMockInternships();
+  }
+};
+
+// Transform raw API data to our Internship interface
+const transformInternshipData = (item: any, index: number): Internship => {
+  return {
+    id: item.id || `internship-${index}`,
+    title: item.title || item.job_title || item.position || 'Internship Position',
+    company: item.company || item.employer_name || item.company_name || 'Company',
+    location: item.location || item.job_location || item.city || 'Location TBD',
+    description: item.description || item.job_description || item.summary || 'Internship opportunity',
+    requirements: Array.isArray(item.requirements) ? item.requirements : 
+                 Array.isArray(item.qualifications) ? item.qualifications :
+                 Array.isArray(item.skills) ? item.skills : [],
+    benefits: Array.isArray(item.benefits) ? item.benefits : 
+             Array.isArray(item.perks) ? item.perks : [],
+    duration: item.duration || item.period || item.length || '3-6 months',
+    stipend: item.stipend || item.salary || item.compensation,
+    application_deadline: item.application_deadline || item.deadline || item.end_date || 
+                        new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days from now
+    application_link: item.application_link || item.apply_url || item.url || '#',
+    posted_date: item.posted_date || item.created_at || item.date_posted || new Date().toISOString(),
+    type: 'internship' as const,
+    tags: Array.isArray(item.tags) ? item.tags : 
+          Array.isArray(item.categories) ? item.categories : [],
+    is_remote: item.is_remote || item.remote || item.work_from_home || false,
+    experience_level: item.experience_level || item.level || item.seniority || 'Entry Level'
+  };
+};
+
 // Mock jobs data as fallback
 const getMockJobs = (): Job[] => [
   {
@@ -185,6 +309,64 @@ const getMockJobs = (): Job[] => [
       Qualifications: ['Passion for UI/UX', 'Creative thinking'],
       Responsibilities: ['Build user interfaces', 'Optimize performance']
     }
+  }
+];
+
+// Mock internships data as fallback
+const getMockInternships = (): Internship[] => [
+  {
+    id: 'mock-internship-1',
+    title: 'Software Development Intern',
+    company: 'TechStart Inc.',
+    location: 'San Francisco, CA',
+    description: 'Join our engineering team as a software development intern. Work on real projects, learn from experienced developers, and contribute to our growing platform.',
+    requirements: ['Python', 'JavaScript', 'Git', 'Problem Solving'],
+    benefits: ['Mentorship', 'Networking', 'Portfolio Projects', 'Stipend'],
+    duration: '3 months',
+    stipend: '$3,000/month',
+    application_deadline: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString(), // 15 days from now
+    application_link: 'https://example.com/apply',
+    posted_date: new Date().toISOString(),
+    type: 'internship',
+    tags: ['Software Development', 'Python', 'JavaScript'],
+    is_remote: false,
+    experience_level: 'Entry Level'
+  },
+  {
+    id: 'mock-internship-2',
+    title: 'Data Science Intern',
+    company: 'DataCorp',
+    location: 'Remote',
+    description: 'Work with our data science team to analyze large datasets, build machine learning models, and create data visualizations for business insights.',
+    requirements: ['Python', 'R', 'SQL', 'Machine Learning', 'Statistics'],
+    benefits: ['Flexible Hours', 'Learning Budget', 'Certificate', 'Job Offer Potential'],
+    duration: '6 months',
+    stipend: '$2,500/month',
+    application_deadline: new Date(Date.now() + 20 * 24 * 60 * 60 * 1000).toISOString(), // 20 days from now
+    application_link: 'https://example.com/apply',
+    posted_date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(), // 2 days ago
+    type: 'internship',
+    tags: ['Data Science', 'Machine Learning', 'Python'],
+    is_remote: true,
+    experience_level: 'Entry Level'
+  },
+  {
+    id: 'mock-internship-3',
+    title: 'Marketing Intern',
+    company: 'GrowthCo',
+    location: 'New York, NY',
+    description: 'Support our marketing team with social media management, content creation, campaign analysis, and brand development initiatives.',
+    requirements: ['Social Media', 'Content Creation', 'Analytics', 'Communication'],
+    benefits: ['Portfolio Building', 'Industry Connections', 'Skill Development'],
+    duration: '4 months',
+    stipend: '$2,000/month',
+    application_deadline: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000).toISOString(), // 10 days from now
+    application_link: 'https://example.com/apply',
+    posted_date: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(), // 1 day ago
+    type: 'internship',
+    tags: ['Marketing', 'Social Media', 'Content Creation'],
+    is_remote: false,
+    experience_level: 'Entry Level'
   }
 ];
 
@@ -292,16 +474,20 @@ const Opportunities = () => {
   const { translate } = useLanguage();
   const [opportunities] = useState<Opportunity[]>(mockOpportunities);
   const [jobs, setJobs] = useState<Job[]>([]);
+  const [internships, setInternships] = useState<Internship[]>([]);
   const [filteredOpportunities, setFilteredOpportunities] = useState<Opportunity[]>(mockOpportunities);
   const [filteredJobs, setFilteredJobs] = useState<Job[]>([]);
+  const [filteredInternships, setFilteredInternships] = useState<Internship[]>([]);
   const [filterType, setFilterType] = useState<string>('all');
   const [sortBy, setSortBy] = useState<string>('relevance');
   const [activeTab, setActiveTab] = useState<string>('all');
   const [showVoiceInterface, setShowVoiceInterface] = useState(false);
   const [isLoadingJobs, setIsLoadingJobs] = useState(false);
+  const [isLoadingInternships, setIsLoadingInternships] = useState(false);
   const [jobSearchQuery, setJobSearchQuery] = useState('developer jobs');
   const [jobLocation, setJobLocation] = useState('us');
   const [apiError, setApiError] = useState<string | null>(null);
+  const [internshipsApiError, setInternshipsApiError] = useState<string | null>(null);
 
   // Fetch jobs from API
   const fetchJobs = async (query: string = jobSearchQuery, location: string = jobLocation) => {
@@ -328,9 +514,35 @@ const Opportunities = () => {
     }
   };
 
-  // Load jobs on component mount
+  // Fetch internships from API
+  const fetchInternships = async () => {
+    setIsLoadingInternships(true);
+    setInternshipsApiError(null);
+    try {
+      const internshipData = await fetchInternshipsFromAPI();
+      setInternships(internshipData);
+      setFilteredInternships(internshipData);
+      
+      // Check if we got mock data (API failed)
+      if (internshipData.length > 0 && internshipData[0].id.startsWith('mock-internship-')) {
+        setInternshipsApiError('Using sample internship data. Please check your RapidAPI configuration for live internship data.');
+      }
+    } catch (error) {
+      console.error('Failed to fetch internships:', error);
+      setInternshipsApiError(error instanceof Error ? error.message : 'Failed to fetch internships. Please try again.');
+      // Set mock data as fallback
+      const mockData = getMockInternships();
+      setInternships(mockData);
+      setFilteredInternships(mockData);
+    } finally {
+      setIsLoadingInternships(false);
+    }
+  };
+
+  // Load jobs and internships on component mount
   useEffect(() => {
     fetchJobs();
+    fetchInternships();
   }, []);
 
   // Voice query handler for opportunities
@@ -362,13 +574,14 @@ const Opportunities = () => {
     }
   };
 
-  // Filter and sort opportunities and jobs
+  // Filter and sort opportunities, jobs, and internships
   useEffect(() => {
     let filteredOpps = [...opportunities];
     let filteredJobsData = [...jobs];
+    let filteredInternshipsData = [...internships];
 
     // Filter opportunities by type
-    if (activeTab !== 'all' && activeTab !== 'jobs') {
+    if (activeTab !== 'all' && activeTab !== 'jobs' && activeTab !== 'internships') {
       filteredOpps = filteredOpps.filter(opp => opp.type === activeTab);
     }
 
@@ -382,9 +595,13 @@ const Opportunities = () => {
     // Sort jobs by date posted
     filteredJobsData.sort((a, b) => new Date(b.job_posted_at_datetime_utc).getTime() - new Date(a.job_posted_at_datetime_utc).getTime());
 
+    // Sort internships by application deadline
+    filteredInternshipsData.sort((a, b) => new Date(a.application_deadline).getTime() - new Date(b.application_deadline).getTime());
+
     setFilteredOpportunities(filteredOpps);
     setFilteredJobs(filteredJobsData);
-  }, [opportunities, jobs, activeTab, sortBy]);
+    setFilteredInternships(filteredInternshipsData);
+  }, [opportunities, jobs, internships, activeTab, sortBy]);
 
   const formatDeadline = (deadline: string) => {
     const date = new Date(deadline);
@@ -666,7 +883,7 @@ const Opportunities = () => {
           transition={{ duration: 0.6, delay: 0.3 }}
         >
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-5 mb-8">
+            <TabsList className="grid w-full grid-cols-6 mb-8">
               <TabsTrigger value="all">
                 {translate('opportunities.filter.all', 'All Types')}
               </TabsTrigger>
@@ -682,10 +899,145 @@ const Opportunities = () => {
               <TabsTrigger value="jobs">
                 {translate('opportunities.filter.jobs', 'Jobs')}
               </TabsTrigger>
+              <TabsTrigger value="live-internships">
+                {translate('opportunities.filter.liveInternships', 'Live Internships')}
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value={activeTab}>
-              {activeTab === 'jobs' ? (
+              {activeTab === 'live-internships' ? (
+                // Live Internships Tab Content
+                <>
+                  {/* Internships API Error Display */}
+                  {internshipsApiError && (
+                    <div className="mb-6 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                      <p className="text-sm text-yellow-800">
+                        <strong>Note:</strong> {internshipsApiError}
+                      </p>
+                      <p className="text-xs text-yellow-700 mt-1">
+                        To use live internship data, ensure your RapidAPI key is valid and you have an active subscription.
+                      </p>
+                      <div className="flex gap-2 mt-2">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => {
+                            console.log('Testing Internships API connection...');
+                            fetchInternships();
+                          }}
+                        >
+                          Test Internships API Connection
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={async () => {
+                            console.log('Testing direct API call...');
+                            try {
+                              const response = await fetch('https://internships-api.p.rapidapi.com/active-ats-7d', {
+                                method: 'GET',
+                                headers: {
+                                  'x-rapidapi-key': 'dd0a88006dmsh80cfa50b1b5bc60p15e5e7jsn0cc002b17d9c',
+                                  'x-rapidapi-host': 'internships-api.p.rapidapi.com'
+                                }
+                              });
+                              console.log('Direct API Response:', response.status);
+                              const data = await response.text();
+                              console.log('Direct API Data:', data);
+                            } catch (error) {
+                              console.error('Direct API Error:', error);
+                            }
+                          }}
+                        >
+                          Test Direct API
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+
+                  {isLoadingInternships ? (
+                    <div className="text-center py-12">
+                      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+                      <p className="text-muted-foreground">
+                        {translate('opportunities.loadingInternships', 'Loading internships...')}
+                      </p>
+                    </div>
+                  ) : filteredInternships.length === 0 ? (
+                    <div className="text-center py-12">
+                      <p className="text-muted-foreground">
+                        {translate('opportunities.noInternships', 'No internships found. Try refreshing the page.')}
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {filteredInternships.map((internship, index) => (
+                        <motion.div
+                          key={internship.id}
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.6, delay: index * 0.05 }}
+                        >
+                          <Card className="h-full hover:shadow-lg transition-all duration-300">
+                            <CardHeader className="pb-3">
+                              <div className="flex justify-between items-start mb-2">
+                                <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300 capitalize">
+                                  {internship.experience_level}
+                                </Badge>
+                                <Badge variant="outline" className="text-xs">
+                                  {formatJobDate(internship.posted_date)}
+                                </Badge>
+                              </div>
+                              <CardTitle className="text-lg">{internship.title}</CardTitle>
+                              <p className="text-sm text-muted-foreground">{internship.company}</p>
+                            </CardHeader>
+                            <CardContent>
+                              <p className="text-sm mb-4 line-clamp-3">{internship.description}</p>
+                              
+                              <div className="space-y-2 mb-4">
+                                <div className="flex items-center text-sm">
+                                  <MapPin className="w-4 h-4 mr-2 text-muted-foreground" />
+                                  {internship.location} {internship.is_remote && '(Remote)'}
+                                </div>
+                                <div className="flex items-center text-sm">
+                                  <Calendar className="w-4 h-4 mr-2 text-muted-foreground" />
+                                  Duration: {internship.duration}
+                                </div>
+                                {internship.stipend && (
+                                  <div className="text-sm font-medium text-green-600">
+                                    {internship.stipend}
+                                  </div>
+                                )}
+                                <div className="flex items-center text-sm">
+                                  <Calendar className="w-4 h-4 mr-2 text-muted-foreground" />
+                                  Deadline: {formatDeadline(internship.application_deadline)}
+                                </div>
+                              </div>
+
+                              {internship.requirements && internship.requirements.length > 0 && (
+                                <div className="flex flex-wrap gap-1 mb-4">
+                                  {internship.requirements.slice(0, 3).map((req, reqIndex) => (
+                                    <Badge key={reqIndex} variant="secondary" className="text-xs">
+                                      {req}
+                                    </Badge>
+                                  ))}
+                                </div>
+                              )}
+
+                              <Button 
+                                className="w-full" 
+                                onClick={() => window.open(internship.application_link, '_blank')}
+                              >
+                                <ExternalLink className="w-4 h-4 mr-2" />
+                                {translate('opportunities.apply', 'Apply Now')}
+                              </Button>
+                            </CardContent>
+                          </Card>
+                        </motion.div>
+                      ))}
+                    </div>
+                  )}
+                </>
+              ) : activeTab === 'jobs' ? (
                 // Jobs Tab Content
                 <>
                   {isLoadingJobs ? (
