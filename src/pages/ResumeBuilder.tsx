@@ -1486,12 +1486,17 @@ export default function ResumeBuilder() {
                     }`}
                     onClick={() => setSelectedTemplate(key as ResumeTemplate)}
                   >
-                    <div className="h-28 rounded mb-3 border overflow-hidden flex items-center justify-center bg-white">
+                    <div className="h-48 rounded-lg mb-3 border-2 overflow-hidden flex items-center justify-center bg-gray-50 p-1">
                       {template.templateImage ? (
                         <img
                           src={template.templateImage}
                           alt={`${template.name} preview`}
-                          className="w-full h-full object-contain"
+                          className="w-full h-full object-cover drop-shadow-sm"
+                          style={{ 
+                            aspectRatio: 'auto', 
+                            objectPosition: 'top center',
+                            filter: 'contrast(1.1) brightness(1.05)'
+                          }}
                           onError={(e) => {
                             // show gradient fallback if image fails
                             const el = e.currentTarget as HTMLImageElement;
@@ -1622,12 +1627,17 @@ export default function ResumeBuilder() {
                             }`}
                             onClick={() => setSelectedTemplate(key as ResumeTemplate)}
                           >
-                            <div className="h-28 rounded mb-3 border overflow-hidden flex items-center justify-center bg-white">
+                            <div className="h-48 rounded-lg mb-3 border-2 overflow-hidden flex items-center justify-center bg-gray-50 p-1">
                               {template.templateImage ? (
                                 <img
                                   src={template.templateImage}
                                   alt={`${template.name} preview`}
-                                  className="w-full h-full object-contain"
+                                  className="w-full h-full object-cover drop-shadow-sm"
+                                  style={{ 
+                                    aspectRatio: 'auto', 
+                                    objectPosition: 'top center',
+                                    filter: 'contrast(1.1) brightness(1.05)'
+                                  }}
                                   onError={(e) => {
                                     const el = e.currentTarget as HTMLImageElement;
                                     el.style.display = 'none';
