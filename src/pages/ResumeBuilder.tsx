@@ -64,6 +64,7 @@ interface TemplateConfig {
   primaryColor: [number, number, number];
   accentColor: [number, number, number];
   headerStyle: "centered" | "left" | "banner";
+  templateImage?: string;
 }
 
 const templates: Record<ResumeTemplate, TemplateConfig> = {
@@ -73,6 +74,7 @@ const templates: Record<ResumeTemplate, TemplateConfig> = {
     primaryColor: [33, 150, 243], // Blue
     accentColor: [69, 90, 100], // Dark blue-grey
     headerStyle: "centered"
+    , templateImage: "/resume-templates/modern-template.png"
   },
   professional: {
     name: "Professional",
@@ -80,6 +82,7 @@ const templates: Record<ResumeTemplate, TemplateConfig> = {
     primaryColor: [76, 175, 80], // Green
     accentColor: [55, 71, 79], // Dark grey
     headerStyle: "left"
+    , templateImage: "/resume-templates/professional-template.png"
   },
   creative: {
     name: "Creative",
@@ -87,6 +90,7 @@ const templates: Record<ResumeTemplate, TemplateConfig> = {
     primaryColor: [156, 39, 176], // Purple
     accentColor: [103, 58, 183], // Deep purple
     headerStyle: "banner"
+    , templateImage: "/resume-templates/creative-template.png"
   }
 };
 
@@ -220,6 +224,7 @@ export default function ResumeBuilder() {
   };
 
   const generatePDF = async () => {
+    let loadingToastId: any = undefined;
     try {
       console.log("GeneratePDF function called");
       setIsGeneratingPdf(true);
@@ -236,8 +241,9 @@ export default function ResumeBuilder() {
         data.personalInfo.email = "" as any;
       }
       
-      console.log("Starting PDF generation...");
-      toast.loading("Generating your professional resume...");
+  console.log("Starting PDF generation...");
+  // show a persistent loading toast and capture its id so we can update/replace it later
+  let loadingToastId: any = toast.loading("Generating your professional resume...");
       
       // Get template configuration
       const template = templates[selectedTemplate];
@@ -598,7 +604,8 @@ export default function ResumeBuilder() {
       if (newTab) {
         newTab.document.title = filename;
         console.log("PDF opened successfully in new tab");
-        toast.success("Resume opened in new tab! You can view and download it from there. 🎉");
+        // Replace the loading toast with a success toast
+        toast.success("Resume opened in new tab! You can view and download it from there. 🎉", { id: loadingToastId });
       } else {
         // Fallback for blocked popups
         console.log("Popup blocked, offering direct download");
@@ -606,7 +613,7 @@ export default function ResumeBuilder() {
         link.href = blobUrl;
         link.download = filename;
         link.click();
-        toast.success("Resume downloaded successfully! 🎉");
+        toast.success("Resume downloaded successfully! 🎉", { id: loadingToastId });
       }
       
       // Clean up the blob URL after a delay to prevent memory leaks
@@ -619,7 +626,13 @@ export default function ResumeBuilder() {
       console.error("Error generating PDF:", error);
       const errorMessage = error instanceof Error ? error.message : "Failed to generate PDF. Please try again.";
       setPdfError(errorMessage);
-      toast.error(errorMessage);
+      // Replace the loading toast with an error toast
+      try {
+        toast.error(errorMessage, { id: (typeof loadingToastId !== 'undefined') ? loadingToastId : undefined });
+      } catch (e) {
+        // fallback if toast id isn't available
+        toast.error(errorMessage);
+      }
     } finally {
       setIsGeneratingPdf(false);
     }
@@ -1473,9 +1486,28 @@ export default function ResumeBuilder() {
                     }`}
                     onClick={() => setSelectedTemplate(key as ResumeTemplate)}
                   >
-                    <div className="h-24 rounded mb-3 border" style={{
-                      background: `linear-gradient(135deg, rgb(${template.primaryColor.join(',')}), rgb(${template.accentColor.join(',')}))`
-                    }} />
+                    <div className="h-28 rounded mb-3 border overflow-hidden flex items-center justify-center bg-white">
+                      {template.templateImage ? (
+                        <img
+                          src={template.templateImage}
+                          alt={`${template.name} preview`}
+                          className="w-full h-full object-contain"
+                          onError={(e) => {
+                            // show gradient fallback if image fails
+                            const el = e.currentTarget as HTMLImageElement;
+                            el.style.display = 'none';
+                            const parent = el.parentElement as HTMLDivElement;
+                            parent.style.background = `linear-gradient(135deg, rgb(${template.primaryColor.join(',')}), rgb(${template.accentColor.join(',')}))`;
+                          }}
+                        />
+                      ) : (
+                        <div style={{
+                          width: '100%',
+                          height: '100%',
+                          background: `linear-gradient(135deg, rgb(${template.primaryColor.join(',')}), rgb(${template.accentColor.join(',')}))`
+                        }} />
+                      )}
+                    </div>
                     <h3 className="font-semibold">{template.name}</h3>
                     <p className="text-sm text-muted-foreground">{template.description}</p>
                   </div>
@@ -1491,6 +1523,19 @@ export default function ResumeBuilder() {
       </div>
     );
   }
+  // Live watched data for in-form preview
+  const watchedData: ResumeData = {
+    personalInfo: form.watch('personalInfo') || {
+      fullName: '', email: '', phone: '', location: '', linkedin: '', github: ''
+    },
+    careerPath: form.watch('careerPath') || '',
+    summary: form.watch('summary') || '',
+    education: form.watch('education') || [{ degree: '', institution: '', year: '', gpa: '' }],
+    skills: form.watch('skills') || [],
+    experience: form.watch('experience') || [{ title: '', company: '', duration: '', description: '' }],
+    projects: form.watch('projects') || [{ name: '', description: '', technologies: '', link: '' }],
+    achievements: form.watch('achievements') || []
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -1577,9 +1622,27 @@ export default function ResumeBuilder() {
                             }`}
                             onClick={() => setSelectedTemplate(key as ResumeTemplate)}
                           >
-                            <div className="h-24 rounded mb-3 border" style={{
-                              background: `linear-gradient(135deg, rgb(${template.primaryColor.join(',')}), rgb(${template.accentColor.join(',')}))`
-                            }} />
+                            <div className="h-28 rounded mb-3 border overflow-hidden flex items-center justify-center bg-white">
+                              {template.templateImage ? (
+                                <img
+                                  src={template.templateImage}
+                                  alt={`${template.name} preview`}
+                                  className="w-full h-full object-contain"
+                                  onError={(e) => {
+                                    const el = e.currentTarget as HTMLImageElement;
+                                    el.style.display = 'none';
+                                    const parent = el.parentElement as HTMLDivElement;
+                                    parent.style.background = `linear-gradient(135deg, rgb(${template.primaryColor.join(',')}), rgb(${template.accentColor.join(',')}))`;
+                                  }}
+                                />
+                              ) : (
+                                <div style={{
+                                  width: '100%',
+                                  height: '100%',
+                                  background: `linear-gradient(135deg, rgb(${template.primaryColor.join(',')}), rgb(${template.accentColor.join(',')}))`
+                                }} />
+                              )}
+                            </div>
                             <h3 className="font-semibold">{template.name}</h3>
                             <p className="text-sm text-muted-foreground">{template.description}</p>
                           </div>
@@ -1588,6 +1651,19 @@ export default function ResumeBuilder() {
                     </CardContent>
                   </Card>
                 )}
+
+                {/* Live preview while editing */}
+                <Card className="mt-6">
+                  <CardHeader>
+                    <CardTitle>Live Preview</CardTitle>
+                    <CardDescription>See how your information looks with the selected template</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="border rounded-lg p-4 bg-muted/10">
+                      <ResumePreview data={watchedData} template={selectedTemplate} />
+                    </div>
+                  </CardContent>
+                </Card>
 
                 <div className="flex justify-between mt-6">
                   <Button
@@ -1601,9 +1677,13 @@ export default function ResumeBuilder() {
                   </Button>
 
                   {currentStep === steps.length - 1 ? (
-                    <Button type="submit" className="flex items-center gap-2">
-                      <Eye className="w-4 h-4" />
-                      Preview Resume
+                    <Button
+                      type="button"
+                      onClick={() => generatePDF()}
+                      className="flex items-center gap-2"
+                    >
+                      <Download className="w-4 h-4" />
+                      Download Resume
                     </Button>
                   ) : (
                     <Button type="button" onClick={nextStep}>
