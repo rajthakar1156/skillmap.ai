@@ -663,29 +663,30 @@ const Opportunities = () => {
     <div className="min-h-screen bg-background">
       <Header />
       
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8">
         <motion.div 
-          className="text-center mb-8"
+          className="text-center mb-6 sm:mb-8"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
         >
-          <h1 className="text-4xl font-bold mb-4">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 sm:mb-4 px-2">
             {translate('opportunities.title', 'Opportunities for You')}
           </h1>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-6">
+          <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-4 sm:mb-6 px-2">
             {translate('opportunities.subtitle', 'Discover scholarships, internships, and hackathons tailored to your profile')}
           </p>
           
           {/* Voice Assistant Button */}
           <Button
             variant="outline"
-            size="lg"
+            size="sm"
             onClick={() => setShowVoiceInterface(!showVoiceInterface)}
-            className="mb-4 bg-primary/5 hover:bg-primary/10 border-primary/20"
+            className="mb-4 bg-primary/5 hover:bg-primary/10 border-primary/20 text-sm sm:text-base"
           >
             <Mic className="w-4 h-4 mr-2" />
-            {translate('voice.askAboutOpportunities', 'Ask About Opportunities')}
+            <span className="hidden sm:inline">{translate('voice.askAboutOpportunities', 'Ask About Opportunities')}</span>
+            <span className="sm:hidden">{translate('voice.ask', 'Ask')}</span>
           </Button>
           
           {/* Voice Interface */}
@@ -710,16 +711,16 @@ const Opportunities = () => {
         {/* Recommended Section */}
         {recommendedOpportunities.length > 0 && (
           <motion.div 
-            className="mb-8"
+            className="mb-6 sm:mb-8"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.1 }}
           >
-            <h2 className="text-2xl font-semibold mb-4 flex items-center">
-              <Star className="w-6 h-6 text-yellow-500 mr-2" />
+            <h2 className="text-xl sm:text-2xl font-semibold mb-3 sm:mb-4 flex items-center justify-center sm:justify-start">
+              <Star className="w-5 h-5 sm:w-6 sm:h-6 text-yellow-500 mr-2" />
               {translate('opportunities.recommended', 'Recommended for You')}
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
               {recommendedOpportunities.slice(0, 3).map((opportunity, index) => (
                 <motion.div
                   key={opportunity.id}
@@ -785,13 +786,13 @@ const Opportunities = () => {
         {/* Job Search Interface */}
         {activeTab === 'jobs' && (
           <motion.div 
-            className="bg-card p-6 rounded-lg border mb-6"
+            className="bg-card p-4 sm:p-6 rounded-lg border mb-4 sm:mb-6"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
           >
-            <h3 className="text-lg font-semibold mb-4 flex items-center">
-              <Briefcase className="w-5 h-5 mr-2" />
+            <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 flex items-center">
+              <Briefcase className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
               {translate('opportunities.jobSearch', 'Search for Jobs')}
             </h3>
             
@@ -818,18 +819,18 @@ const Opportunities = () => {
               </div>
             )}
             
-            <div className="flex flex-col sm:flex-row gap-4">
+            <div className="space-y-3 sm:space-y-0 sm:flex sm:flex-row sm:gap-4">
               <div className="flex-1">
                 <Input
                   placeholder={translate('opportunities.jobSearchPlaceholder', 'Search for jobs (e.g., "software engineer", "data scientist")')}
                   value={jobSearchQuery}
                   onChange={(e) => setJobSearchQuery(e.target.value)}
-                  className="w-full"
+                  className="w-full text-sm sm:text-base"
                 />
               </div>
-              <div className="sm:w-32">
+              <div className="flex gap-2 sm:block sm:w-32">
                 <Select value={jobLocation} onValueChange={setJobLocation}>
-                  <SelectTrigger>
+                  <SelectTrigger className="flex-1 sm:w-full">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -840,28 +841,34 @@ const Opportunities = () => {
                     <SelectItem value="in">India</SelectItem>
                   </SelectContent>
                 </Select>
+                <Button 
+                  onClick={() => fetchJobs(jobSearchQuery, jobLocation)}
+                  disabled={isLoadingJobs}
+                  className="sm:w-auto px-3 sm:px-4"
+                  size="sm"
+                >
+                  <Search className="w-4 h-4 mr-1 sm:mr-2" />
+                  <span className="hidden sm:inline">
+                    {isLoadingJobs ? translate('opportunities.searching', 'Searching...') : translate('opportunities.search', 'Search')}
+                  </span>
+                  <span className="sm:hidden">
+                    {isLoadingJobs ? '...' : 'Go'}
+                  </span>
+                </Button>
               </div>
-              <Button 
-                onClick={() => fetchJobs(jobSearchQuery, jobLocation)}
-                disabled={isLoadingJobs}
-                className="sm:w-auto"
-              >
-                <Search className="w-4 h-4 mr-2" />
-                {isLoadingJobs ? translate('opportunities.searching', 'Searching...') : translate('opportunities.search', 'Search')}
-              </Button>
             </div>
           </motion.div>
         )}
 
         {/* Filters and Sort */}
         <motion.div 
-          className="flex flex-col sm:flex-row gap-4 mb-6"
+          className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-4 sm:mb-6"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
         >
           <Select value={sortBy} onValueChange={setSortBy}>
-            <SelectTrigger className="w-full sm:w-48">
+            <SelectTrigger className="w-full sm:w-48 text-sm sm:text-base">
               <SortAsc className="w-4 h-4 mr-2" />
               <SelectValue />
             </SelectTrigger>
@@ -883,26 +890,33 @@ const Opportunities = () => {
           transition={{ duration: 0.6, delay: 0.3 }}
         >
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-6 mb-8">
-              <TabsTrigger value="all">
-                {translate('opportunities.filter.all', 'All Types')}
-              </TabsTrigger>
-              <TabsTrigger value="scholarship">
-                {translate('opportunities.filter.scholarship', 'Scholarships')}
-              </TabsTrigger>
-              <TabsTrigger value="internship">
-                {translate('opportunities.filter.internship', 'Internships')}
-              </TabsTrigger>
-              <TabsTrigger value="hackathon">
-                {translate('opportunities.filter.hackathon', 'Hackathons')}
-              </TabsTrigger>
-              <TabsTrigger value="jobs">
-                {translate('opportunities.filter.jobs', 'Jobs')}
-              </TabsTrigger>
-              <TabsTrigger value="live-internships">
-                {translate('opportunities.filter.liveInternships', 'Live Internships')}
-              </TabsTrigger>
-            </TabsList>
+            <div className="overflow-x-auto mb-6 sm:mb-8">
+              <TabsList className="grid w-full grid-cols-6 min-w-max sm:min-w-0">
+                <TabsTrigger value="all" className="text-xs sm:text-sm px-2 sm:px-3">
+                  <span className="hidden sm:inline">{translate('opportunities.filter.all', 'All Types')}</span>
+                  <span className="sm:hidden">All</span>
+                </TabsTrigger>
+                <TabsTrigger value="scholarship" className="text-xs sm:text-sm px-2 sm:px-3">
+                  <span className="hidden sm:inline">{translate('opportunities.filter.scholarship', 'Scholarships')}</span>
+                  <span className="sm:hidden">Scholarships</span>
+                </TabsTrigger>
+                <TabsTrigger value="internship" className="text-xs sm:text-sm px-2 sm:px-3">
+                  <span className="hidden sm:inline">{translate('opportunities.filter.internship', 'Internships')}</span>
+                  <span className="sm:hidden">Internships</span>
+                </TabsTrigger>
+                <TabsTrigger value="hackathon" className="text-xs sm:text-sm px-2 sm:px-3">
+                  <span className="hidden sm:inline">{translate('opportunities.filter.hackathon', 'Hackathons')}</span>
+                  <span className="sm:hidden">Hackathons</span>
+                </TabsTrigger>
+                <TabsTrigger value="jobs" className="text-xs sm:text-sm px-2 sm:px-3">
+                  {translate('opportunities.filter.jobs', 'Jobs')}
+                </TabsTrigger>
+                <TabsTrigger value="live-internships" className="text-xs sm:text-sm px-2 sm:px-3">
+                  <span className="hidden sm:inline">{translate('opportunities.filter.liveInternships', 'Live Internships')}</span>
+                  <span className="sm:hidden">Live</span>
+                </TabsTrigger>
+              </TabsList>
+            </div>
 
             <TabsContent value={activeTab}>
               {activeTab === 'live-internships' ? (
@@ -969,7 +983,7 @@ const Opportunities = () => {
                       </p>
                     </div>
                   ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                       {filteredInternships.map((internship, index) => (
                         <motion.div
                           key={internship.id}
@@ -978,45 +992,45 @@ const Opportunities = () => {
                           transition={{ duration: 0.6, delay: index * 0.05 }}
                         >
                           <Card className="h-full hover:shadow-lg transition-all duration-300">
-                            <CardHeader className="pb-3">
+                            <CardHeader className="pb-2 sm:pb-3">
                               <div className="flex justify-between items-start mb-2">
-                                <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300 capitalize">
+                                <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300 capitalize text-xs">
                                   {internship.experience_level}
                                 </Badge>
                                 <Badge variant="outline" className="text-xs">
                                   {formatJobDate(internship.posted_date)}
                                 </Badge>
                               </div>
-                              <CardTitle className="text-lg">{internship.title}</CardTitle>
-                              <p className="text-sm text-muted-foreground">{internship.company}</p>
+                              <CardTitle className="text-base sm:text-lg leading-tight">{internship.title}</CardTitle>
+                              <p className="text-xs sm:text-sm text-muted-foreground">{internship.company}</p>
                             </CardHeader>
-                            <CardContent>
-                              <p className="text-sm mb-4 line-clamp-3">{internship.description}</p>
+                            <CardContent className="p-3 sm:p-6">
+                              <p className="text-xs sm:text-sm mb-3 sm:mb-4 line-clamp-3">{internship.description}</p>
                               
-                              <div className="space-y-2 mb-4">
-                                <div className="flex items-center text-sm">
-                                  <MapPin className="w-4 h-4 mr-2 text-muted-foreground" />
-                                  {internship.location} {internship.is_remote && '(Remote)'}
+                              <div className="space-y-1 sm:space-y-2 mb-3 sm:mb-4">
+                                <div className="flex items-center text-xs sm:text-sm">
+                                  <MapPin className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 text-muted-foreground flex-shrink-0" />
+                                  <span className="truncate">{internship.location} {internship.is_remote && '(Remote)'}</span>
                                 </div>
-                                <div className="flex items-center text-sm">
-                                  <Calendar className="w-4 h-4 mr-2 text-muted-foreground" />
+                                <div className="flex items-center text-xs sm:text-sm">
+                                  <Calendar className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 text-muted-foreground flex-shrink-0" />
                                   Duration: {internship.duration}
                                 </div>
                                 {internship.stipend && (
-                                  <div className="text-sm font-medium text-green-600">
+                                  <div className="text-xs sm:text-sm font-medium text-green-600">
                                     {internship.stipend}
                                   </div>
                                 )}
-                                <div className="flex items-center text-sm">
-                                  <Calendar className="w-4 h-4 mr-2 text-muted-foreground" />
+                                <div className="flex items-center text-xs sm:text-sm">
+                                  <Calendar className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 text-muted-foreground flex-shrink-0" />
                                   Deadline: {formatDeadline(internship.application_deadline)}
                                 </div>
                               </div>
 
                               {internship.requirements && internship.requirements.length > 0 && (
-                                <div className="flex flex-wrap gap-1 mb-4">
+                                <div className="flex flex-wrap gap-1 mb-3 sm:mb-4">
                                   {internship.requirements.slice(0, 3).map((req, reqIndex) => (
-                                    <Badge key={reqIndex} variant="secondary" className="text-xs">
+                                    <Badge key={reqIndex} variant="secondary" className="text-xs px-1 py-0">
                                       {req}
                                     </Badge>
                                   ))}
@@ -1024,10 +1038,11 @@ const Opportunities = () => {
                               )}
 
                               <Button 
-                                className="w-full" 
+                                className="w-full text-xs sm:text-sm py-2 sm:py-3" 
+                                size="sm"
                                 onClick={() => window.open(internship.application_link, '_blank')}
                               >
-                                <ExternalLink className="w-4 h-4 mr-2" />
+                                <ExternalLink className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
                                 {translate('opportunities.apply', 'Apply Now')}
                               </Button>
                             </CardContent>
