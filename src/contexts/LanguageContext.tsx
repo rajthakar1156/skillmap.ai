@@ -20,6 +20,7 @@ const translations: Record<Language, Record<string, string>> = {
     'nav.resume': 'Resume Builder',
     'nav.opportunities': 'Opportunities',
     'nav.start': 'Start Assessment',
+    'nav.logout': 'Logout',
     
     // Hero Section
     'hero.title': 'Discover Your Perfect Career with AI',
@@ -169,6 +170,7 @@ const translations: Record<Language, Record<string, string>> = {
     'nav.resume': 'रिज्यूमे बिल्डर',
     'nav.opportunities': 'अवसर',
     'nav.start': 'आकलन शुरू करें',
+    'nav.logout': 'लॉग आउट',
     
     // Hero Section
     'hero.title': 'AI के साथ अपना सही करियर खोजें',
@@ -309,6 +311,7 @@ const translations: Record<Language, Record<string, string>> = {
     'nav.resume': 'રિઝ્યુમે બિલ્ડર',
     'nav.opportunities': 'તકો',
     'nav.start': 'મૂલ્યાંકન શરૂ કરો',
+    'nav.logout': 'લોગ આઉટ',
     
     // Hero Section
     'hero.title': 'AI સાથે તમારી સંપૂર્ણ કારકિર્દી શોધો',
@@ -415,6 +418,7 @@ const translations: Record<Language, Record<string, string>> = {
     'nav.resume': 'ரெஸ்யூமே பில்டர்',
     'nav.opportunities': 'வாய்ப்புகள்',
     'nav.start': 'மதிப்பீடு தொடங்கு',
+    'nav.logout': 'வெளியேறு',
     
     // Hero Section
     'hero.title': 'AI மூலம் உங்கள் சரியான தொழிலை கண்டறியுங்கள்',
@@ -520,6 +524,7 @@ const translations: Record<Language, Record<string, string>> = {
     'nav.resume': 'রেজিউমে বিল্ডার',
     'nav.opportunities': 'সুযোগ',
     'nav.start': 'মূল্যায়ন শুরু করুন',
+    'nav.logout': 'লগ আউট',
     
     // Resume Builder
     'resume.builder.title': 'AI-চালিত রেজিউমে বিল্ডার',
@@ -621,6 +626,7 @@ const translations: Record<Language, Record<string, string>> = {
     'nav.resume': 'రెజ్యూమే బిల్డర్',
     'nav.opportunities': 'అవకాశాలు',
     'nav.start': 'మూల్యాంకనం ప్రారంభించు',
+    'nav.logout': 'లాగ్ అవుట్',
     
     // Hero Section - Telugu
     'hero.title': 'AI తో మీ పరిపూర్ణ కెరీర్‌ను కనుగొనండి',
@@ -660,6 +666,7 @@ const translations: Record<Language, Record<string, string>> = {
     'nav.resume': 'रिझ्युमे बिल्डर',
     'nav.opportunities': 'संधी',
     'nav.start': 'मूल्यमापन सुरू करा',
+    'nav.logout': 'लॉग आउट',
     
     // Hero Section - Marathi
     'hero.title': 'AI सह तुमचा परिपूर्ण करिअर शोधा',
@@ -699,6 +706,7 @@ const translations: Record<Language, Record<string, string>> = {
     'nav.resume': 'ರೆಸ್ಯೂಮೆ ಬಿಲ್ಡರ್',
     'nav.opportunities': 'ಅವಕಾಶಗಳು',
     'nav.start': 'ಮೌಲ್ಯಮಾಪನ ಪ್ರಾರಂಭಿಸಿ',
+    'nav.logout': 'ಲಾಗ್ ಔಟ್',
     
     // Hero Section - Kannada
     'hero.title': 'AI ಯೊಂದಿಗೆ ನಿಮ್ಮ ಪರಿಪೂರ್ಣ ವೃತ್ತಿಜೀವನವನ್ನು ಕಂಡುಕೊಳ್ಳಿ',
@@ -738,6 +746,7 @@ const translations: Record<Language, Record<string, string>> = {
     'nav.resume': 'റെസ്യൂമെ ബിൽഡർ',
     'nav.opportunities': 'അവസരങ്ങൾ',
     'nav.start': 'വിലയിരുത്തൽ ആരംഭിക്കുക',
+    'nav.logout': 'ലോഗ് ഔട്ട്',
     
     // Hero Section - Malayalam
     'hero.title': 'AI ഉപയോഗിച്ച് നിങ്ങളുടെ പൂർണ്ണമായ കരിയർ കണ്ടെത്തുക',
@@ -777,6 +786,7 @@ const translations: Record<Language, Record<string, string>> = {
     'nav.resume': 'ରେଜ୍ୟୁମ୍ ବିଲ୍ଡର୍',
     'nav.opportunities': 'ସୁଯୋଗ',
     'nav.start': 'ମୂଲ୍ୟାୟନ ଆରମ୍ଭ କରନ୍ତୁ',
+    'nav.logout': 'ଲଗ୍ ଆଉଟ୍',
     
     // Voice Interface - Odia
     'voice.startListening': 'ଭଏସ୍ କ୍ୱେରୀ ଆରମ୍ଭ କରନ୍ତୁ',
@@ -794,6 +804,7 @@ const translations: Record<Language, Record<string, string>> = {
     'nav.resume': 'ਰੈਜ਼ਿਊਮੇ ਬਿਲਡਰ',
     'nav.opportunities': 'ਮੌਕੇ',
     'nav.start': 'ਮੁਲਾਂਕਣ ਸ਼ੁਰੂ ਕਰੋ',
+    'nav.logout': 'ਲੌਗ ਆਉਟ',
     
     // Voice Interface - Punjabi
     'voice.startListening': 'ਆਵਾਜ਼ ਕਿਊਰੀ ਸ਼ੁਰੂ ਕਰੋ',
@@ -811,6 +822,7 @@ const translations: Record<Language, Record<string, string>> = {
     'nav.resume': 'ৰেজিউমে বিল্ডাৰ',
     'nav.opportunities': 'সুযোগ',
     'nav.start': 'মূল্যায়ন আৰম্ভ কৰক',
+    'nav.logout': 'লগ আউট',
     
     // Voice Interface - Assamese
     'voice.startListening': 'ভয়েছ কুৱেৰী আৰম্ভ কৰক',
@@ -828,6 +840,7 @@ const translations: Record<Language, Record<string, string>> = {
     'nav.resume': 'ریزیومے بلڈر',
     'nav.opportunities': 'مواقع',
     'nav.start': 'تشخیص شروع کریں',
+    'nav.logout': 'لاگ آؤٹ',
     
     // Hero Section - Urdu
     'hero.title': 'AI کے ساتھ اپنا کامل کیریئر دریافت کریں',

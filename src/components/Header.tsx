@@ -12,7 +12,8 @@ import {
   Shield,
   ChevronDown,
   Languages,
-  Target
+  Target,
+  LogOut
 } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
@@ -22,6 +23,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useLanguage, type Language } from "@/contexts/LanguageContext";
+import { useClerk } from "@clerk/clerk-react";
 
 const Header = () => {
   const { theme, setTheme } = useTheme();
@@ -29,6 +31,7 @@ const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const { signOut } = useClerk();
 
   const isActive = (path: string) => location.pathname === path;
 
@@ -136,14 +139,15 @@ const Header = () => {
               <span className="sr-only">Toggle theme</span>
             </Button>
 
-            {/* Get Started Button - Desktop */}
+            {/* Logout Button - Desktop */}
             <Button
               variant="default"
               size="sm"
-              onClick={() => navigate('/profile')}
+              onClick={() => signOut()}
               className="hidden sm:inline-flex"
             >
-              {translate('nav.start', 'Start Assessment')}
+              <LogOut className="w-4 h-4 mr-2" />
+              {translate('nav.logout', 'Logout')}
             </Button>
 
             {/* Mobile Menu Button */}
@@ -185,11 +189,12 @@ const Header = () => {
                   variant="default"
                   className="w-full justify-start"
                   onClick={() => {
-                    navigate('/profile');
+                    signOut();
                     setIsMobileMenuOpen(false);
                   }}
                 >
-                  {translate('nav.start', 'Start Assessment')}
+                  <LogOut className="w-4 h-4 mr-2" />
+                  {translate('nav.logout', 'Logout')}
                 </Button>
               </div>
             </nav>
